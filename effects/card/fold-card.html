@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+
+        .fold-card {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .fold-part {
+            position: absolute;
+            width: 100%;
+            height: 25%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transform-origin: top;
+            transition: transform 0.5s ease;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .fold-part:nth-child(2) { top: 25%; transition-delay: 0.1s; }
+        .fold-part:nth-child(3) { top: 50%; transition-delay: 0.2s; }
+        .fold-part:nth-child(4) { top: 75%; transition-delay: 0.3s; }
+
+        .fold-card:hover .fold-part:nth-child(1) { transform: rotateX(-90deg); }
+        .fold-card:hover .fold-part:nth-child(2) { transform: rotateX(-60deg); }
+        .fold-card:hover .fold-part:nth-child(3) { transform: rotateX(-30deg); }
+        .fold-card:hover .fold-part:nth-child(4) { transform: rotateX(0deg); }
+    </style>
+</head>
+<body>
+    <div class="fold-card">
+        <div class="fold-part">悬浮查看</div>
+        <div class="fold-part">3D折叠</div>
+        <div class="fold-part">动画效果</div>
+        <div class="fold-part">炫酷展示</div>
+    </div>
+</body>
+</html> 

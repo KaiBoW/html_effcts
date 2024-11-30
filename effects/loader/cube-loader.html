@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            perspective: 1000px;
+        }
+
+        .cube-container {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 4s infinite linear;
+        }
+
+        .cube {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        .front  { transform: translateZ(50px); background: rgba(255, 99, 71, 0.3); }
+        .back   { transform: translateZ(-50px) rotateY(180deg); background: rgba(65, 105, 225, 0.3); }
+        .right  { transform: translateX(50px) rotateY(90deg); background: rgba(50, 205, 50, 0.3); }
+        .left   { transform: translateX(-50px) rotateY(-90deg); background: rgba(255, 215, 0, 0.3); }
+        .top    { transform: translateY(-50px) rotateX(90deg); background: rgba(238, 130, 238, 0.3); }
+        .bottom { transform: translateY(50px) rotateX(-90deg); background: rgba(135, 206, 235, 0.3); }
+
+        @keyframes rotate {
+            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.8); }
+        }
+
+        .face::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent, rgba(255,255,255,0.2));
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cube-container">
+        <div class="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+</body>
+</html> 

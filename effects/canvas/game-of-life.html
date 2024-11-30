@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="randomize()">随机生成</button>
+        <button onclick="togglePause()">暂停/继续</button>
+        <button onclick="changeColor()">切换颜色</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const cellSize = 10;
+        const cols = Math.floor(canvas.width / cellSize);
+        const rows = Math.floor(canvas.height / cellSize);
+        let grid = [];
+        let nextGrid = [];
+        let isPaused = false;
+        let colorScheme = 0;
+        const colors = [
+            ['#4ecdc4', '#45b7af', '#3ca29a'],
+            ['#ff6b6b', '#ff5252', '#ff3939'],
+            ['#ffe66d', '#ffd700', '#ffc300']
+        ];
+
+        function createGrid() {
+            for (let i = 0; i < cols; i++) {
+                grid[i] = [];
+                nextGrid[i] = [];
+                for (let j = 0; j < rows; j++) {
+                    grid[i][j] = {
+                        alive: false,
+                        age: 0
+                    };
+                    nextGrid[i][j] = {
+                        alive: false,
+                        age: 0
+                    };
+                }
+            }
+        }
+
+        function randomize() {
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    grid[i][j].alive = Math.random() > 0.85;
+                    grid[i][j].age = 0;
+                }
+            }
+        }
+
+        function countNeighbors(x, y) {
+            let sum = 0;
+            for (let i = -1; i < 2; i++) {
+                for (let j = -1; j < 2; j++) {
+                    let col = (x + i + cols) % cols;
+                    let row = (y + j + rows) % rows;
+                    sum += grid[col][row].alive ? 1 : 0;
+                }
+            }
+            sum -= grid[x][y].alive ? 1 : 0;
+            return sum;
+        }
+
+        function update() {
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    let neighbors = countNeighbors(i, j);
+                    let state = grid[i][j].alive;
+                    let age = grid[i][j].age;
+
+                    if (state && (neighbors < 2 || neighbors > 3)) {
+                        nextGrid[i][j].alive = false;
+                        nextGrid[i][j].age = 0;
+                    } else if (!state && neighbors === 3) {
+                        nextGrid[i][j].alive = true;
+                        nextGrid[i][j].age = 0;
+                    } else {
+                        nextGrid[i][j].alive = state;
+                        nextGrid[i][j].age = state ? age + 1 : 0;
+                    }
+                }
+            }
+
+            let temp = grid;
+            grid = nextGrid;
+            nextGrid = temp;
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(26,26,26,0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    if (grid[i][j].alive) {
+                        const age = Math.min(grid[i][j].age, colors[colorScheme].length - 1);
+                        ctx.fillStyle = colors[colorScheme][age];
+                        ctx.fillRect(i * cellSize, j * cellSize, cellSize - 1, cellSize - 1);
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            if (!isPaused) {
+                update();
+            }
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+        }
+
+        function changeColor() {
+            colorScheme = (colorScheme + 1) % colors.length;
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const x = Math.floor(e.clientX / cellSize);
+            const y = Math.floor(e.clientY / cellSize);
+            if (x >= 0 && x < cols && y >= 0 && y < rows) {
+                grid[x][y].alive = !grid[x][y].alive;
+                grid[x][y].age = 0;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (e.buttons === 1) {
+                const x = Math.floor(e.clientX / cellSize);
+                const y = Math.floor(e.clientY / cellSize);
+                if (x >= 0 && x < cols && y >= 0 && y < rows) {
+                    grid[x][y].alive = true;
+                    grid[x][y].age = 0;
+                }
+            }
+        });
+
+        createGrid();
+        randomize();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            createGrid();
+            randomize();
+        });
+    </script>
+</body>
+</html> 

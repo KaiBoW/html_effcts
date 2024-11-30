@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changePattern()">切换图案</button>
+        <button onclick="toggleEffect()">切换效果</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        let patternIndex = 0;
+        let effectMode = 0;
+        const modes = ['morph', 'gravity', 'vortex'];
+
+        const patterns = [
+            // 圆形
+            (x, y) => Math.sqrt(x * x + y * y) < 100,
+            // 心形
+            (x, y) => (Math.pow(x, 2) + Math.pow(y - Math.sqrt(Math.abs(x)), 2)) < 100,
+            // 星形
+            (x, y) => {
+                const angle = Math.atan2(y, x);
+                const r = Math.sqrt(x * x + y * y);
+                return r < (Math.cos(angle * 5) * 50 + 100);
+            }
+        ];
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.originX = x;
+                this.originY = y;
+                this.targetX = x;
+                this.targetY = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.force = 0;
+                this.angle = 0;
+                this.size = Math.random() * 2 + 2;
+                this.color = `hsl(${Math.random() * 60 + 180}, 70%, 50%)`;
+                this.friction = 0.95;
+                this.gravity = 0.1;
+                this.ease = 0.1;
+            }
+
+            update() {
+                switch(modes[effectMode]) {
+                    case 'morph':
+                        const dx = this.targetX - this.x;
+                        const dy = this.targetY - this.y;
+                        this.x += dx * this.ease;
+                        this.y += dy * this.ease;
+                        break;
+
+                    case 'gravity':
+                        this.vy += this.gravity;
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        this.vx *= this.friction;
+                        this.vy *= this.friction;
+
+                        if (this.y > canvas.height - this.size) {
+                            this.y = canvas.height - this.size;
+                            this.vy *= -0.6;
+                        }
+                        break;
+
+                    case 'vortex':
+                        const centerX = canvas.width / 2;
+                        const centerY = canvas.height / 2;
+                        const dx2 = this.x - centerX;
+                        const dy2 = this.y - centerY;
+                        const dist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                        const angle = Math.atan2(dy2, dx2);
+                        
+                        this.x += Math.cos(angle + 0.1) * dist * 0.01;
+                        this.y += Math.sin(angle + 0.1) * dist * 0.01;
+                        break;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles.length = 0;
+            const scale = 5;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 2;
+
+            for (let x = -150; x < 150; x += 10) {
+                for (let y = -150; y < 150; y += 10) {
+                    if (patterns[patternIndex](x/scale, y/scale)) {
+                        particles.push(new Particle(
+                            x + offsetX,
+                            y + offsetY
+                        ));
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function changePattern() {
+            patternIndex = (patternIndex + 1) % patterns.length;
+            const scale = 5;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 2;
+
+            particles.forEach((particle, i) => {
+                let found = false;
+                for (let x = -150; x < 150 && !found; x += 10) {
+                    for (let y = -150; y < 150 && !found; y += 10) {
+                        if (patterns[patternIndex](x/scale, y/scale)) {
+                            particle.targetX = x + offsetX;
+                            particle.targetY = y + offsetY;
+                            found = true;
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleEffect() {
+            effectMode = (effectMode + 1) % modes.length;
+            if (modes[effectMode] === 'gravity') {
+                particles.forEach(particle => {
+                    particle.vy = -10;
+                });
+            }
+        }
+
+        initParticles();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+    </script>
+</body>
+</html> 

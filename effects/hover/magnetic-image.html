@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .magnetic-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            perspective: 1000px;
+        }
+
+        .magnetic-image {
+            width: 100%;
+            height: 100%;
+            background-image: url('https://picsum.photos/600/800');
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease;
+            cursor: pointer;
+        }
+
+        .glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            background: radial-gradient(
+                circle at var(--mouse-x) var(--mouse-y),
+                rgba(255,255,255,0.3),
+                transparent 50%
+            );
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .magnetic-container:hover .glow {
+            opacity: 1;
+        }
+
+        .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .magnetic-container:hover .caption {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="magnetic-container">
+        <div class="magnetic-image"></div>
+        <div class="glow"></div>
+        <div class="caption">磁性图片悬停效果</div>
+    </div>
+
+    <script>
+        const container = document.querySelector('.magnetic-container');
+        const image = document.querySelector('.magnetic-image');
+        const glow = document.querySelector('.glow');
+        const strength = 30;
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const deltaX = (x - centerX) / centerX;
+            const deltaY = (y - centerY) / centerY;
+
+            image.style.transform = `
+                rotateY(${deltaX * strength}deg)
+                rotateX(${-deltaY * strength}deg)
+                scale(1.1)
+            `;
+
+            glow.style.setProperty('--mouse-x', x + 'px');
+            glow.style.setProperty('--mouse-y', y + 'px');
+        });
+
+        container.addEventListener('mouseleave', () => {
+            image.style.transform = 'rotateY(0) rotateX(0) scale(1)';
+        });
+    </script>
+</body>
+</html>

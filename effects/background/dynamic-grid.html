@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="content">动态网格</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const gridSize = 30;
+        const points = [];
+        let mouseX = 0;
+        let mouseY = 0;
+
+        class Point {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.baseX = x;
+                this.baseY = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.friction = 0.9;
+                this.springFactor = 0.05;
+                this.distanceThreshold = 100;
+                this.size = 2;
+            }
+
+            update() {
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < this.distanceThreshold) {
+                    const force = (this.distanceThreshold - distance) / this.distanceThreshold;
+                    this.vx -= dx * force * 0.02;
+                    this.vy -= dy * force * 0.02;
+                }
+
+                const dx2 = this.baseX - this.x;
+                const dy2 = this.baseY - this.y;
+                this.vx += dx2 * this.springFactor;
+                this.vy += dy2 * this.springFactor;
+
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                for (let x = 0; x < canvas.width; x += gridSize) {
+                    points.push(new Point(x, y));
+                }
+            }
+        }
+
+        function drawLines() {
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[i].x - points[j].x;
+                    const dy = points[i].y - points[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < gridSize * 1.5) {
+                        ctx.beginPath();
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            points.forEach(point => {
+                point.update();
+                point.draw();
+            });
+
+            drawLines();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            points.length = 0;
+            init();
+        });
+    </script>
+</body>
+</html> 

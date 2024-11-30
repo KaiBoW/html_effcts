@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .text-container {
+            position: relative;
+            font-size: 5em;
+            color: white;
+            cursor: pointer;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .text {
+            position: relative;
+            z-index: 1;
+            transition: opacity 0.3s;
+        }
+
+        .text-container:hover .text {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-container">
+        <div class="text">悬停文字</div>
+        <canvas></canvas>
+    </div>
+
+    <script>
+        const canvas = document.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        const text = document.querySelector('.text');
+        const particles = [];
+        const mouse = { x: 0, y: 0 };
+        let isHovering = false;
+
+        function resizeCanvas() {
+            const rect = text.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            canvas.style.left = rect.left + 'px';
+            canvas.style.top = rect.top + 'px';
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.baseX = x;
+                this.baseY = y;
+                this.size = Math.random() * 3 + 1;
+                this.density = Math.random() * 30 + 1;
+                this.color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            update() {
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const forceDirectionX = dx / distance;
+                const forceDirectionY = dy / distance;
+                const maxDistance = 100;
+                const force = (maxDistance - distance) / maxDistance;
+                const directionX = forceDirectionX * force * this.density;
+                const directionY = forceDirectionY * force * this.density;
+
+                if (distance < maxDistance && isHovering) {
+                    this.x -= directionX;
+                    this.y -= directionY;
+                } else {
+                    if (this.x !== this.baseX) {
+                        const dx = this.x - this.baseX;
+                        this.x -= dx/10;
+                    }
+                    if (this.y !== this.baseY) {
+                        const dy = this.y - this.baseY;
+                        this.y -= dy/10;
+                    }
+                }
+            }
+        }
+
+        function init() {
+            particles.length = 0;
+            const rect = text.getBoundingClientRect();
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = rect.width;
+            tempCanvas.height = rect.height;
+            tempCtx.font = getComputedStyle(text).font;
+            tempCtx.fillStyle = 'white';
+            tempCtx.textBaseline = 'top';
+            tempCtx.fillText(text.textContent, 0, 0);
+
+            const imageData = tempCtx.getImageData(0, 0, rect.width, rect.height);
+            for (let y = 0; y < rect.height; y += 4) {
+                for (let x = 0; x < rect.width; x += 4) {
+                    if (imageData.data[(y * rect.width + x) * 4 + 3] > 128) {
+                        particles.push(new Particle(x, y));
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            init();
+        });
+
+        text.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left;
+            mouse.y = e.clientY - rect.top;
+            isHovering = true;
+        });
+
+        text.addEventListener('mouseleave', () => {
+            isHovering = false;
+        });
+
+        resizeCanvas();
+        init();
+        animate();
+    </script>
+</body>
+</html> 

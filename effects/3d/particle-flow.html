@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeFlow()">切换流向</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 1000;
+        let flowDirection = 1;
+
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+                this.z = Math.random() * 500;
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = flowDirection === 1 ? canvas.height + 10 : -10;
+                this.z = Math.random() * 500;
+                this.speed = Math.random() * 2 + 1;
+                this.color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+            }
+
+            update() {
+                this.y += this.speed * -flowDirection;
+                this.z += 0.1;
+
+                if (flowDirection === 1 && this.y < -10) this.reset();
+                if (flowDirection === -1 && this.y > canvas.height + 10) this.reset();
+
+                const scale = 1000 / (1000 + this.z);
+                const x = this.x * scale + canvas.width / 2 * (1 - scale);
+                const y = this.y * scale + canvas.height / 2 * (1 - scale);
+                const size = scale * 5;
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.sort((a, b) => b.z - a.z);
+            particles.forEach(particle => particle.update());
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeFlow() {
+            flowDirection *= -1;
+        }
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

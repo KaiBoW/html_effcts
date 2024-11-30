@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+
+        .text-container {
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .text {
+            font-size: 5em;
+            font-weight: bold;
+            color: transparent;
+            -webkit-text-stroke: 2px #fff;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .text span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .text span:nth-child(1) { color: #ff0000; transform: translateZ(20px); }
+        .text span:nth-child(2) { color: #00ff00; transform: translateZ(0); }
+        .text span:nth-child(3) { color: #0000ff; transform: translateZ(-20px); }
+
+        @keyframes float {
+            0%, 100% {
+                transform: rotateX(10deg) rotateY(10deg);
+            }
+            50% {
+                transform: rotateX(-10deg) rotateY(-10deg);
+            }
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="text-container">
+        <div class="text">
+            <span>3D文字</span>
+            <span>3D文字</span>
+            <span>3D文字</span>
+        </div>
+    </div>
+    <div class="controls">
+        <button onclick="spread()">展开</button>
+        <button onclick="gather()">聚合</button>
+    </div>
+
+    <script>
+        const spans = document.querySelectorAll('.text span');
+        let isSpread = false;
+
+        function spread() {
+            spans.forEach((span, i) => {
+                span.style.transform = `translateZ(${(i - 1) * 100}px)`;
+            });
+            isSpread = true;
+        }
+
+        function gather() {
+            spans.forEach((span, i) => {
+                span.style.transform = `translateZ(${(i - 1) * 20}px)`;
+            });
+            isSpread = false;
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isSpread) {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                document.querySelector('.text-container').style.transform = 
+                    `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .wall {
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(20deg);
+        }
+
+        .image-container {
+            position: absolute;
+            width: 200px;
+            height: 300px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .image {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            transform-origin: center;
+            transition: transform 0.5s;
+            cursor: pointer;
+        }
+
+        .image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image:hover::after {
+            opacity: 1;
+        }
+
+        .image:hover {
+            transform: scale(1.1) translateZ(50px);
+        }
+    </style>
+</head>
+<body>
+    <div class="wall"></div>
+
+    <script>
+        const wall = document.querySelector('.wall');
+        const images = [
+            'https://picsum.photos/400/600?random=1',
+            'https://picsum.photos/400/600?random=2',
+            'https://picsum.photos/400/600?random=3',
+            'https://picsum.photos/400/600?random=4',
+            'https://picsum.photos/400/600?random=5',
+            'https://picsum.photos/400/600?random=6',
+            'https://picsum.photos/400/600?random=7',
+            'https://picsum.photos/400/600?random=8',
+            'https://picsum.photos/400/600?random=9'
+        ];
+
+        const rows = 3;
+        const cols = 3;
+        const spacing = 220;
+
+        images.forEach((url, i) => {
+            const container = document.createElement('div');
+            container.className = 'image-container';
+
+            const image = document.createElement('div');
+            image.className = 'image';
+            image.style.backgroundImage = `url(${url})`;
+
+            const row = Math.floor(i / cols);
+            const col = i % cols;
+            const x = (col - (cols - 1) / 2) * spacing;
+            const y = (row - (rows - 1) / 2) * spacing;
+            const z = 0;
+
+            container.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+            container.appendChild(image);
+            wall.appendChild(container);
+        });
+
+        // 添加鼠标移动视差效果
+        document.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            wall.style.transform = `rotateX(${20 + yAxis}deg) rotateY(${xAxis}deg)`;
+        });
+    </script>
+</body>
+</html> 

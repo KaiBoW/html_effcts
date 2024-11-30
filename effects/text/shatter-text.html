@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .shatter-container {
+            position: relative;
+            font-size: 6em;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .shatter-piece {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.8s ease;
+        }
+
+        .shatter-original {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .shatter-container.active .shatter-original {
+            opacity: 0;
+        }
+
+        .shatter-container.active .shatter-piece {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="shatter-container" onclick="shatterText(this)">
+        <div class="shatter-original">碎片文字</div>
+    </div>
+
+    <script>
+        function shatterText(container) {
+            if (!container.classList.contains('active')) {
+                const text = container.querySelector('.shatter-original').textContent;
+                const pieces = text.split('').map((char, i) => {
+                    const piece = document.createElement('div');
+                    piece.className = 'shatter-piece';
+                    piece.textContent = char;
+                    piece.style.left = `${i * 1.2}em`;
+                    
+                    // 随机动画效果
+                    const randomX = (Math.random() - 0.5) * 100;
+                    const randomY = (Math.random() - 0.5) * 100;
+                    const randomRotate = (Math.random() - 0.5) * 720;
+                    
+                    piece.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)`;
+                    return piece;
+                });
+
+                pieces.forEach(piece => container.appendChild(piece));
+                container.classList.add('active');
+
+                setTimeout(() => {
+                    container.classList.remove('active');
+                    pieces.forEach(piece => piece.remove());
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeColor()">切换颜色</button>
+        <button onclick="toggleAnimation()">暂停/继续</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 100;
+        let isAnimating = true;
+        let colorScheme = 0;
+        const colors = [
+            ['rgba(255,255,255,', 'rgba(200,200,200,', 'rgba(150,150,150,'],
+            ['rgba(255,100,100,', 'rgba(255,150,100,', 'rgba(255,200,100,'],
+            ['rgba(100,100,255,', 'rgba(100,150,255,', 'rgba(100,200,255,']
+        ];
+
+        class SmokeParticle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = canvas.width / 2 + (Math.random() - 0.5) * 50;
+                this.y = canvas.height - 50;
+                this.size = Math.random() * 50 + 20;
+                this.velocityX = (Math.random() - 0.5) * 2;
+                this.velocityY = -Math.random() * 3 - 1;
+                this.life = 1;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 2;
+            }
+
+            update() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                this.rotation += this.rotationSpeed;
+                this.life -= 0.01;
+                this.size += 0.5;
+
+                if (this.life <= 0) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+                const currentColors = colors[colorScheme];
+                gradient.addColorStop(0, currentColors[0] + this.life + ')');
+                gradient.addColorStop(0.5, currentColors[1] + this.life * 0.5 + ')');
+                gradient.addColorStop(1, currentColors[2] + '0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new SmokeParticle());
+            }
+        }
+
+        function animate() {
+            if (!isAnimating) return;
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeColor() {
+            colorScheme = (colorScheme + 1) % colors.length;
+        }
+
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            if (isAnimating) animate();
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            particles.forEach(particle => {
+                const dx = e.clientX - particle.x;
+                const dy = e.clientY - particle.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 200) {
+                    particle.velocityX += dx / dist * 0.2;
+                    particle.velocityY += dy / dist * 0.2;
+                }
+            });
+        });
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

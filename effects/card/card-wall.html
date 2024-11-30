@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .wall {
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 20s infinite linear;
+        }
+
+        .card {
+            position: absolute;
+            width: 100px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.2) translateZ(50px);
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotateY(0deg) rotateX(20deg);
+            }
+            to {
+                transform: rotateY(360deg) rotateX(20deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="wall"></div>
+
+    <script>
+        const wall = document.querySelector('.wall');
+        const cardCount = 50;
+        const radius = 500;
+
+        for (let i = 0; i < cardCount; i++) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.textContent = i + 1;
+
+            const theta = (i / cardCount) * 2 * Math.PI;
+            const x = radius * Math.cos(theta);
+            const z = radius * Math.sin(theta);
+
+            card.style.transform = `translate3d(${x}px, 0, ${z}px) rotateY(${theta * 180 / Math.PI}deg)`;
+
+            wall.appendChild(card);
+        }
+    </script>
+</body>
+</html> 

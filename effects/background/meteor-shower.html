@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .meteor {
+            position: absolute;
+            width: 2px;
+            height: 90px;
+            background: linear-gradient(45deg, #fff, transparent);
+            transform: rotate(45deg);
+            animation: meteor linear infinite;
+        }
+
+        @keyframes meteor {
+            0% {
+                transform: rotate(45deg) translateX(0);
+                opacity: 1;
+            }
+            70% {
+                opacity: 1;
+            }
+            100% {
+                transform: rotate(45deg) translateX(1500px);
+                opacity: 0;
+            }
+        }
+
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="content">流星雨效果</div>
+    <script>
+        function createMeteor() {
+            const meteor = document.createElement('div');
+            meteor.className = 'meteor';
+            
+            // 随机位置和动画时间
+            const startX = Math.random() * window.innerWidth - 700;
+            const startY = Math.random() * window.innerHeight - 300;
+            const duration = Math.random() * 1 + 0.5;
+            
+            meteor.style.left = startX + 'px';
+            meteor.style.top = startY + 'px';
+            meteor.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(meteor);
+            
+            setTimeout(() => {
+                meteor.remove();
+            }, duration * 1000);
+        }
+
+        // 每隔一段时间创建新流星
+        setInterval(createMeteor, 300);
+    </script>
+</body>
+</html> 

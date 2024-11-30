@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button, input {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        input[type="text"] {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <input type="text" id="textInput" placeholder="输入文字..." value="Hello">
+        <button onclick="changeText()">变形</button>
+        <button onclick="toggleEffect()">切换效果</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        let targetParticles = [];
+        let effectMode = 0;
+        const modes = ['morph', 'explode', 'swirl'];
+        let currentText = 'Hello';
+        let morphing = false;
+        let progress = 0;
+
+        class Particle {
+            constructor(x, y, targetX, targetY) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.targetX = targetX || x;
+                this.targetY = targetY || y;
+                this.vx = 0;
+                this.vy = 0;
+                this.ease = 0.1;
+                this.friction = 0.95;
+                this.size = Math.random() * 2 + 2;
+                this.color = `hsl(${Math.random() * 60 + 180}, 70%, 50%)`;
+            }
+
+            update() {
+                switch(modes[effectMode]) {
+                    case 'morph':
+                        const dx = this.targetX - this.x;
+                        const dy = this.targetY - this.y;
+                        this.x += dx * this.ease;
+                        this.y += dy * this.ease;
+                        break;
+
+                    case 'explode':
+                        this.vx *= this.friction;
+                        this.vy *= this.friction;
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        break;
+
+                    case 'swirl':
+                        const angle = Math.atan2(this.y - canvas.height/2, this.x - canvas.width/2);
+                        const distance = Math.sqrt(
+                            Math.pow(this.x - canvas.width/2, 2) + 
+                            Math.pow(this.y - canvas.height/2, 2)
+                        );
+                        this.x += Math.cos(angle + 0.1) * distance * 0.01;
+                        this.y += Math.sin(angle + 0.1) * distance * 0.01;
+                        break;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initText(text) {
+            const fontSize = Math.min(canvas.width / 10, 100);
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const metrics = ctx.measureText(text);
+            const textWidth = metrics.width;
+            const textHeight = fontSize;
+
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = textWidth;
+            tempCanvas.height = textHeight * 1.5;
+
+            tempCtx.font = `bold ${fontSize}px Arial`;
+            tempCtx.fillStyle = 'white';
+            tempCtx.textAlign = 'center';
+            tempCtx.textBaseline = 'middle';
+            tempCtx.fillText(text, textWidth/2, textHeight/2 + fontSize/4);
+
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const positions = [];
+
+            for (let y = 0; y < imageData.height; y += 4) {
+                for (let x = 0; x < imageData.width; x += 4) {
+                    const i = (y * imageData.width + x) * 4;
+                    if (imageData.data[i + 3] > 128) {
+                        positions.push({
+                            x: x + (canvas.width - textWidth)/2,
+                            y: y + (canvas.height - textHeight)/2
+                        });
+                    }
+                }
+            }
+
+            return positions;
+        }
+
+        function init() {
+            const positions = initText(currentText);
+            particles.length = 0;
+
+            for (let i = 0; i < positions.length; i++) {
+                particles.push(new Particle(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height,
+                    positions[i].x,
+                    positions[i].y
+                ));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeText() {
+            const newText = document.getElementById('textInput').value || 'Hello';
+            if (newText !== currentText) {
+                currentText = newText;
+                const positions = initText(currentText);
+                particles.forEach((particle, i) => {
+                    if (i < positions.length) {
+                        particle.targetX = positions[i].x;
+                        particle.targetY = positions[i].y;
+                    }
+                });
+            }
+        }
+
+        function toggleEffect() {
+            effectMode = (effectMode + 1) % modes.length;
+            if (modes[effectMode] === 'explode') {
+                particles.forEach(particle => {
+                    particle.vx = (Math.random() - 0.5) * 20;
+                    particle.vy = (Math.random() - 0.5) * 20;
+                });
+            }
+        }
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+    </script>
+</body>
+</html> 

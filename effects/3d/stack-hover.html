@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+
+        .stack {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.5s;
+            backface-visibility: hidden;
+            transform-origin: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .card:nth-child(1) { transform: translateZ(0px); }
+        .card:nth-child(2) { transform: translateZ(-20px); }
+        .card:nth-child(3) { transform: translateZ(-40px); }
+        .card:nth-child(4) { transform: translateZ(-60px); }
+        .card:nth-child(5) { transform: translateZ(-80px); }
+
+        .stack:hover .card:nth-child(1) { transform: translateZ(100px) rotateX(0deg); }
+        .stack:hover .card:nth-child(2) { transform: translateZ(50px) rotateX(10deg); }
+        .stack:hover .card:nth-child(3) { transform: translateZ(0px) rotateX(20deg); }
+        .stack:hover .card:nth-child(4) { transform: translateZ(-50px) rotateX(30deg); }
+        .stack:hover .card:nth-child(5) { transform: translateZ(-100px) rotateX(40deg); }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+            border-radius: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="stack">
+        <div class="card">1</div>
+        <div class="card">2</div>
+        <div class="card">3</div>
+        <div class="card">4</div>
+        <div class="card">5</div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .infinity-loader {
+            width: 120px;
+            height: 60px;
+            position: relative;
+        }
+
+        .infinity-loader::before,
+        .infinity-loader::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 8px solid transparent;
+            border-top-color: #00ff00;
+            border-radius: 50%;
+            animation: rotate 2s linear infinite;
+        }
+
+        .infinity-loader::before {
+            left: 0;
+            animation-delay: 1s;
+        }
+
+        .infinity-loader::after {
+            right: 0;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(360deg) scale(1.5);
+            }
+            100% {
+                transform: rotate(720deg) scale(1);
+            }
+        }
+
+        .loader-text {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff00;
+            font-size: 1.2em;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="infinity-loader">
+        <div class="loader-text">加载中...</div>
+    </div>
+</body>
+</html> 

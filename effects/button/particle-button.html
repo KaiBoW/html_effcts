@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .particle-button {
+            padding: 20px 40px;
+            font-size: 1.2em;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .particle-button:hover {
+            background: #45a049;
+        }
+
+        .particle {
+            pointer-events: none;
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <button class="particle-button">点击产生粒子</button>
+
+    <script>
+        const button = document.querySelector('.particle-button');
+
+        function createParticle(x, y, color) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            document.body.appendChild(particle);
+
+            const destinationX = (Math.random() - 0.5) * 300;
+            const destinationY = (Math.random() - 0.5) * 300;
+            const rotation = Math.random() * 520;
+            const delay = Math.random() * 200;
+
+            particle.style.backgroundColor = color;
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+
+            particle.style.transition = 'transform 1s ease-out, opacity 1s ease-out';
+            particle.style.transitionDelay = delay + 'ms';
+
+            requestAnimationFrame(() => {
+                particle.style.transform = `translate(${destinationX}px, ${destinationY}px) rotate(${rotation}deg)`;
+                particle.style.opacity = '0';
+            });
+
+            setTimeout(() => {
+                particle.remove();
+            }, 2000);
+        }
+
+        button.addEventListener('click', (e) => {
+            const rect = button.getBoundingClientRect();
+            const x = e.clientX;
+            const y = e.clientY;
+
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+
+            for (let i = 0; i < 30; i++) {
+                createParticle(x, y, colors[Math.floor(Math.random() * colors.length)]);
+            }
+        });
+    </script>
+</body>
+</html> 

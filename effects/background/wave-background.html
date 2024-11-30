@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="content">波浪背景</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const waves = [
+            { y: canvas.height * 0.25, length: 0.01, amplitude: 50, speed: 0.01 },
+            { y: canvas.height * 0.5, length: 0.02, amplitude: 30, speed: 0.02 },
+            { y: canvas.height * 0.75, length: 0.015, amplitude: 40, speed: 0.015 }
+        ];
+
+        let time = 0;
+
+        function drawWave(wave) {
+            ctx.beginPath();
+            ctx.moveTo(0, wave.y);
+
+            for (let x = 0; x < canvas.width; x++) {
+                const y = wave.y + Math.sin(x * wave.length + time * wave.speed) * wave.amplitude;
+                ctx.lineTo(x, y);
+            }
+
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+
+            const gradient = ctx.createLinearGradient(0, wave.y - wave.amplitude, 0, wave.y + wave.amplitude);
+            gradient.addColorStop(0, 'rgba(0,255,255,0.2)');
+            gradient.addColorStop(1, 'rgba(0,100,255,0.4)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            waves.forEach(drawWave);
+            time += 0.05;
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            waves.forEach(wave => {
+                wave.y = canvas.height * wave.y / canvas.height;
+            });
+        });
+    </script>
+</body>
+</html> 

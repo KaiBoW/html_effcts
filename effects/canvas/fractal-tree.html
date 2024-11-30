@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button, input {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeColor()">切换颜色</button>
+        <input type="range" min="0" max="100" value="45" oninput="updateAngle(this.value)">
+        <button onclick="resetTree()">重置</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let angle = Math.PI / 4;
+        let colorScheme = 0;
+        const colors = [
+            ['#ff6b6b', '#4ecdc4'],
+            ['#a8e6cf', '#ff8b94'],
+            ['#ffd93d', '#ff6b6b']
+        ];
+
+        function drawBranch(startX, startY, len, angle, depth) {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            const endX = startX + len * Math.cos(angle);
+            const endY = startY + len * Math.sin(angle);
+            ctx.lineTo(endX, endY);
+
+            const currentColors = colors[colorScheme];
+            if (isFinite(startX) && isFinite(startY) && isFinite(endX) && isFinite(endY)) {
+                const gradient = ctx.createLinearGradient(startX, startY, endX, endY);
+                gradient.addColorStop(0, currentColors[0]);
+                gradient.addColorStop(1, currentColors[1]);
+                ctx.strokeStyle = gradient;
+            } else {
+                ctx.strokeStyle = colors[colorScheme][0];
+            }
+
+            ctx.lineWidth = depth;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            if (len < 10) {
+                // 绘制叶子
+                ctx.beginPath();
+                ctx.arc(endX, endY, 2, 0, Math.PI * 2);
+                ctx.fillStyle = currentColors[1];
+                ctx.fill();
+                return;
+            }
+
+            // 递归绘制分支
+            const branchAngle = Math.PI / 4; // 分支角度
+            drawBranch(endX, endY, len * 0.7, angle - branchAngle, depth * 0.7);
+            drawBranch(endX, endY, len * 0.7, angle + branchAngle, depth * 0.7);
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(26,26,26,1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const startX = canvas.width / 2;
+            const startY = canvas.height * 0.8;
+            const startLength = canvas.height * 0.3;
+            const startAngle = -Math.PI / 2;
+            const startDepth = 15;
+
+            drawBranch(startX, startY, startLength, startAngle, startDepth);
+        }
+
+        function updateAngle(value) {
+            angle = (value / 100) * Math.PI;
+            draw();
+        }
+
+        function changeColor() {
+            colorScheme = (colorScheme + 1) % colors.length;
+            draw();
+        }
+
+        function resetTree() {
+            angle = Math.PI / 4;
+            document.querySelector('input[type="range"]').value = 45;
+            draw();
+        }
+
+        // 添加鼠标交互
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            angle = Math.PI * (x / canvas.width);
+            draw();
+        });
+
+        // 添加触摸支持
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.touches[0].clientX - rect.left;
+            const y = e.touches[0].clientY - rect.top;
+            angle = Math.PI * (x / canvas.width);
+            draw();
+        });
+
+        draw();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        });
+    </script>
+</body>
+</html> 

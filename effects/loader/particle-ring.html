@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .ring-container {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 10s linear infinite;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+            transform-style: preserve-3d;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotateX(60deg) rotateZ(0); }
+            to { transform: rotateX(60deg) rotateZ(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ring-container"></div>
+
+    <script>
+        const container = document.querySelector('.ring-container');
+        const particleCount = 50;
+        const radius = 80;
+        const colors = ['#ff3366', '#00ffff', '#33ff66', '#ffff00'];
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const angle = (i / particleCount) * Math.PI * 2;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            const delay = i * (2 / particleCount);
+
+            particle.style.left = `${x + 100}px`;
+            particle.style.top = `${y + 100}px`;
+            particle.style.backgroundColor = colors[i % colors.length];
+            particle.style.boxShadow = `0 0 10px ${colors[i % colors.length]}`;
+            particle.style.animationDelay = `${delay}s`;
+
+            container.appendChild(particle);
+        }
+    </script>
+</body>
+</html> 

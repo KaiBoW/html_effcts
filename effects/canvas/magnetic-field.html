@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="addMagnet()">添加磁极</button>
+        <button onclick="togglePolarity()">切换极性</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const fieldLines = [];
+        const magnets = [];
+        const lineCount = 200;
+        let currentPolarity = 1;
+
+        class FieldLine {
+            constructor(x, y) {
+                this.points = [{x, y}];
+                this.maxPoints = 100;
+                this.stepSize = 5;
+                this.color = `hsl(${Math.random() * 60 + 200}, 70%, 50%)`;
+            }
+
+            update() {
+                if (this.points.length >= this.maxPoints) return;
+
+                const lastPoint = this.points[this.points.length - 1];
+                const force = this.calculateForce(lastPoint.x, lastPoint.y);
+                const magnitude = Math.sqrt(force.x * force.x + force.y * force.y);
+                
+                if (magnitude === 0) return;
+
+                const dx = (force.x / magnitude) * this.stepSize;
+                const dy = (force.y / magnitude) * this.stepSize;
+
+                this.points.push({
+                    x: lastPoint.x + dx,
+                    y: lastPoint.y + dy
+                });
+            }
+
+            calculateForce(x, y) {
+                let totalX = 0;
+                let totalY = 0;
+
+                magnets.forEach(magnet => {
+                    const dx = x - magnet.x;
+                    const dy = y - magnet.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const force = magnet.strength / (dist * dist);
+
+                    totalX += (dx / dist) * force * magnet.polarity;
+                    totalY += (dy / dist) * force * magnet.polarity;
+                });
+
+                return { x: totalX, y: totalY };
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.points[0].x, this.points[0].y);
+                
+                for (let i = 1; i < this.points.length; i++) {
+                    const point = this.points[i];
+                    const prevPoint = this.points[i - 1];
+                    const midX = (prevPoint.x + point.x) / 2;
+                    const midY = (prevPoint.y + point.y) / 2;
+                    ctx.quadraticCurveTo(prevPoint.x, prevPoint.y, midX, midY);
+                }
+
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        class Magnet {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.strength = 5000;
+                this.polarity = currentPolarity;
+                this.radius = 20;
+                this.color = this.polarity > 0 ? '#ff3366' : '#3366ff';
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+
+                // 绘制极性标识
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.polarity > 0 ? 'N' : 'S', this.x, this.y);
+            }
+        }
+
+        function init() {
+            // 创建初始磁场线
+            for (let i = 0; i < lineCount; i++) {
+                const angle = (i / lineCount) * Math.PI * 2;
+                const radius = Math.min(canvas.width, canvas.height) * 0.4;
+                const x = canvas.width/2 + Math.cos(angle) * radius;
+                const y = canvas.height/2 + Math.sin(angle) * radius;
+                fieldLines.push(new FieldLine(x, y));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            fieldLines.forEach(line => {
+                line.update();
+                line.draw();
+            });
+
+            magnets.forEach(magnet => {
+                magnet.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function addMagnet() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            magnets.push(new Magnet(x, y));
+            resetFieldLines();
+        }
+
+        function togglePolarity() {
+            currentPolarity *= -1;
+        }
+
+        function resetFieldLines() {
+            fieldLines.length = 0;
+            init();
+        }
+
+        canvas.addEventListener('click', (e) => {
+            magnets.push(new Magnet(e.clientX, e.clientY));
+            resetFieldLines();
+        });
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            resetFieldLines();
+        });
+    </script>
+</body>
+</html> 

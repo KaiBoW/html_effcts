@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .text-wall {
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 20s infinite linear;
+        }
+
+        .text-item {
+            position: absolute;
+            font-size: 2em;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: transform 0.3s, color 0.3s;
+            transform-style: preserve-3d;
+        }
+
+        .text-item:hover {
+            color: #00ff00;
+            transform: scale(1.5) translateZ(50px);
+        }
+
+        @keyframes rotate {
+            from { transform: rotateY(0deg) rotateX(20deg); }
+            to { transform: rotateY(360deg) rotateX(20deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="text-wall"></div>
+
+    <script>
+        const wall = document.querySelector('.text-wall');
+        const texts = ['3D', '文字', '墙', '效果', '炫酷', '动画', '旋转', '悬浮'];
+        const count = 40;
+        const radius = 400;
+
+        for (let i = 0; i < count; i++) {
+            const text = document.createElement('div');
+            text.className = 'text-item';
+            text.textContent = texts[i % texts.length];
+
+            const theta = (i / count) * 2 * Math.PI;
+            const phi = (Math.random() * Math.PI) - Math.PI/2;
+            
+            const x = radius * Math.cos(theta) * Math.cos(phi);
+            const y = radius * Math.sin(phi);
+            const z = radius * Math.sin(theta) * Math.cos(phi);
+
+            text.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateY(${theta * 180 / Math.PI}deg)`;
+
+            wall.appendChild(text);
+        }
+    </script>
+</body>
+</html> 

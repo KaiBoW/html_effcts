@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            background: #1a1a1a;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            perspective: 2px;
+            transform-style: preserve-3d;
+            height: 100vh;
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+        .parallax-wrapper {
+            width: 100vw;
+            height: 100vh;
+            padding-top: 20vh;
+            box-sizing: border-box;
+        }
+
+        .parallax-group {
+            position: relative;
+            height: 100vh;
+            transform-style: preserve-3d;
+        }
+
+        .parallax-layer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+        }
+
+        .base-layer {
+            transform: translateZ(0);
+            background: rgba(0,0,0,0.5);
+        }
+
+        .back-layer {
+            transform: translateZ(-2px) scale(2);
+        }
+
+        .mid-layer {
+            transform: translateZ(-1px) scale(1.5);
+        }
+
+        .layer-1 { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
+        .layer-2 { background: linear-gradient(45deg, #4ecdc4, #ff6b6b); }
+        .layer-3 { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
+
+        .content {
+            background: #1a1a1a;
+            padding: 50px;
+            margin: 0 auto;
+            max-width: 800px;
+            transform: translateZ(0);
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="parallax-wrapper">
+        <div class="parallax-group">
+            <div class="parallax-layer back-layer layer-1">背景层</div>
+            <div class="parallax-layer mid-layer layer-2">中间层</div>
+            <div class="parallax-layer base-layer">前景层</div>
+        </div>
+        
+        <div class="content">
+            <h2>3D视差滚动</h2>
+            <p>向下滚动查看效果</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+            <!-- 添加更多内容以产生滚动效果 -->
+            <div style="height: 100vh;"></div>
+            <div style="height: 100vh;"></div>
+            <div style="height: 100vh;"></div>
+        </div>
+    </div>
+</body>
+</html> 

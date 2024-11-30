@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeText('文字')">文字</button>
+        <button onclick="changeText('粒子')">粒子</button>
+        <button onclick="changeText('3D')">3D</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 2000;
+        let angleX = 0;
+        let angleY = 0;
+        let currentText = '文字';
+
+        class Particle {
+            constructor(x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+                this.baseX = x;
+                this.baseY = y;
+                this.baseZ = z;
+                this.color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+            }
+
+            rotate() {
+                const cosX = Math.cos(angleX);
+                const sinX = Math.sin(angleX);
+                const cosY = Math.cos(angleY);
+                const sinY = Math.sin(angleY);
+
+                const y = this.baseY * cosX - this.baseZ * sinX;
+                const z = this.baseY * sinX + this.baseZ * cosX;
+                const x = this.baseX * cosY - z * sinY;
+
+                this.x = x;
+                this.y = y;
+                this.z = this.baseX * sinY + z * cosY;
+            }
+
+            draw() {
+                const scale = 1000 / (1000 + this.z);
+                const x = this.x * scale + canvas.width / 2;
+                const y = this.y * scale + canvas.height / 2;
+                const size = scale * 3;
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createTextParticles(text) {
+            ctx.font = '200px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, canvas.width/2, canvas.height/2);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            const positions = [];
+
+            for (let y = 0; y < canvas.height; y += 5) {
+                for (let x = 0; x < canvas.width; x += 5) {
+                    const i = (y * canvas.width + x) * 4;
+                    if (pixels[i + 3] > 128) {
+                        positions.push({
+                            x: x - canvas.width/2,
+                            y: y - canvas.height/2,
+                            z: 0
+                        });
+                    }
+                }
+            }
+
+            return positions;
+        }
+
+        function init(text) {
+            particles.length = 0;
+            const positions = createTextParticles(text);
+            
+            for (let i = 0; i < Math.min(particleCount, positions.length); i++) {
+                particles.push(new Particle(
+                    positions[i].x,
+                    positions[i].y,
+                    positions[i].z
+                ));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            angleX += 0.003;
+            angleY += 0.005;
+
+            particles.sort((a, b) => b.z - a.z);
+            particles.forEach(particle => {
+                particle.rotate();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeText(text) {
+            currentText = text;
+            init(text);
+        }
+
+        init(currentText);
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init(currentText);
+        });
+    </script>
+</body>
+</html> 

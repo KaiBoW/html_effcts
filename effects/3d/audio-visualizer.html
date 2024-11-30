@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #000;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        button, input {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        #file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="document.getElementById('file-input').click()">选择音乐</button>
+        <button onclick="toggleVisualization()">切换效果</button>
+        <input type="file" id="file-input" accept="audio/*">
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let audioContext;
+        let analyser;
+        let source;
+        let dataArray;
+        let bufferLength;
+        let isPlaying = false;
+        let visualizationMode = 'bars'; // 'bars' or 'circular'
+        let angleX = 0;
+        let angleY = 0;
+
+        function initAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+        }
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!audioContext) initAudio();
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                if (isPlaying) {
+                    source.stop();
+                    source.disconnect();
+                }
+
+                const audioData = await audioContext.decodeAudioData(e.target.result);
+                source = audioContext.createBufferSource();
+                source.buffer = audioData;
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                source.start();
+                isPlaying = true;
+                animate();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function drawBars() {
+            const barWidth = canvas.width / bufferLength * 2;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = dataArray[i] * 1.5;
+                const r = barHeight + 25;
+                const g = 250;
+                const b = 50;
+
+                ctx.save();
+                ctx.translate(x, canvas.height / 2);
+                ctx.rotate(angleX);
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fillRect(-barWidth/2, -barHeight/2, barWidth, barHeight);
+                ctx.restore();
+
+                x += barWidth + 1;
+            }
+        }
+
+        function drawCircular() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 150;
+            const bars = 200;
+
+            for (let i = 0; i < bars; i++) {
+                const amplitude = dataArray[i] * 1.5;
+                const angle = (i * 2 * Math.PI) / bars;
+                const x = centerX + Math.cos(angle + angleY) * (radius + amplitude);
+                const y = centerY + Math.sin(angle + angleY) * (radius + amplitude);
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                const hue = (i / bars) * 360;
+                ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        function animate() {
+            if (!isPlaying) return;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            analyser.getByteFrequencyData(dataArray);
+
+            if (visualizationMode === 'bars') {
+                drawBars();
+                angleX += 0.01;
+            } else {
+                drawCircular();
+                angleY += 0.02;
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function toggleVisualization() {
+            visualizationMode = visualizationMode === 'bars' ? 'circular' : 'bars';
+        }
+
+        document.getElementById('file-input').addEventListener('change', handleFile);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

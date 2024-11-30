@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button, input {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        label:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <label for="imageInput">选择图片</label>
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="toggleEffect()">切换效果</button>
+        <button onclick="resetParticles()">重置</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        let image = new Image();
+        let imageData;
+        let effectMode = 0;
+        const modes = ['scatter', 'gather', 'explode'];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.originX = x;
+                this.originY = y;
+                this.color = color;
+                this.size = Math.random() * 2 + 1;
+                this.vx = (Math.random() - 0.5) * 20;
+                this.vy = (Math.random() - 0.5) * 20;
+                this.friction = 0.95;
+                this.ease = 0.1;
+                this.distanceFromMouse = 0;
+                this.force = 0;
+                this.angle = 0;
+            }
+
+            update(mouse) {
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                this.distanceFromMouse = distance;
+                this.force = (100 - distance) / 100;
+                if (this.force < 0) this.force = 0;
+                this.angle = Math.atan2(dy, dx);
+
+                switch(modes[effectMode]) {
+                    case 'scatter':
+                        if (distance < 100) {
+                            this.vx = (this.force * Math.cos(this.angle)) * -1;
+                            this.vy = (this.force * Math.sin(this.angle)) * -1;
+                        }
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        this.vx *= this.friction;
+                        this.vy *= this.friction;
+                        break;
+
+                    case 'gather':
+                        const dx2 = this.originX - this.x;
+                        const dy2 = this.originY - this.y;
+                        this.x += dx2 * this.ease;
+                        this.y += dy2 * this.ease;
+                        break;
+
+                    case 'explode':
+                        if (distance < 100) {
+                            this.vx += Math.cos(this.angle) * this.force;
+                            this.vy += Math.sin(this.angle) * this.force;
+                        }
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        this.vx *= this.friction;
+                        this.vy *= this.friction;
+                        break;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles.length = 0;
+            const imageSize = Math.min(canvas.width, canvas.height) * 0.8;
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = imageSize;
+            tempCanvas.height = imageSize;
+            
+            tempCtx.drawImage(image, 0, 0, imageSize, imageSize);
+            imageData = tempCtx.getImageData(0, 0, imageSize, imageSize);
+
+            const centerX = (canvas.width - imageSize) / 2;
+            const centerY = (canvas.height - imageSize) / 2;
+
+            for (let y = 0; y < imageData.height; y += 4) {
+                for (let x = 0; x < imageData.width; x += 4) {
+                    const i = (y * imageData.width + x) * 4;
+                    const r = imageData.data[i];
+                    const g = imageData.data[i + 1];
+                    const b = imageData.data[i + 2];
+                    const a = imageData.data[i + 3];
+
+                    if (a > 128) {
+                        const color = `rgb(${r},${g},${b})`;
+                        particles.push(new Particle(
+                            x + centerX,
+                            y + centerY,
+                            color
+                        ));
+                    }
+                }
+            }
+        }
+
+        const mouse = {
+            x: undefined,
+            y: undefined
+        };
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update(mouse);
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function toggleEffect() {
+            effectMode = (effectMode + 1) % modes.length;
+        }
+
+        function resetParticles() {
+            init();
+        }
+
+        // 图片上传处理
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    image.src = event.target.result;
+                    image.onload = function() {
+                        init();
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 默认加载示例图片
+        image.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0id2hpdGUiLz48L3N2Zz4=';
+        image.onload = function() {
+            init();
+            animate();
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+    </script>
+</body>
+</html> 

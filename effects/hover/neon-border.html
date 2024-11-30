@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .neon-card {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .neon-card::before,
+        .neon-card::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            background: linear-gradient(315deg,
+                #00ff00, #00ffff, #ff00ff,
+                #ff0000, #ffff00, #00ff00);
+            background-size: 400%;
+            animation: borderRotate 20s linear infinite;
+            z-index: -1;
+        }
+
+        .neon-card::after {
+            filter: blur(20px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .neon-card:hover::after {
+            opacity: 1;
+        }
+
+        .content {
+            position: relative;
+            width: calc(100% - 4px);
+            height: calc(100% - 4px);
+            background: #1a1a1a;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .icon {
+            font-size: 4em;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .title {
+            font-size: 1.5em;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes borderRotate {
+            0% { background-position: 0 0; }
+            100% { background-position: 400% 0; }
+        }
+
+        .neon-lines {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .neon-card:hover .neon-lines {
+            opacity: 1;
+        }
+
+        .line {
+            position: absolute;
+            background: #fff;
+            box-shadow: 0 0 10px #fff,
+                       0 0 20px #0ff,
+                       0 0 30px #0ff;
+        }
+
+        .line-h {
+            width: 100%;
+            height: 1px;
+            animation: scanHorizontal 2s linear infinite;
+        }
+
+        .line-v {
+            width: 1px;
+            height: 100%;
+            animation: scanVertical 2s linear infinite;
+        }
+
+        @keyframes scanHorizontal {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(400px); }
+        }
+
+        @keyframes scanVertical {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="neon-card">
+        <div class="content">
+            <div class="icon">✨</div>
+            <div class="title">霓虹边框</div>
+        </div>
+        <div class="neon-lines">
+            <div class="line line-h"></div>
+            <div class="line line-v"></div>
+        </div>
+    </div>
+</body>
+</html> 

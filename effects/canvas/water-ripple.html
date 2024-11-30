@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeColor()">切换颜色</button>
+        <button onclick="addRipple()">添加波纹</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let colorScheme = 0;
+        const colors = [
+            { r: 66, g: 134, b: 244 },
+            { r: 76, g: 205, b: 196 },
+            { r: 255, g: 107, b: 107 }
+        ];
+
+        class WaterRipple {
+            constructor() {
+                this.cols = 100;
+                this.rows = 100;
+                this.dampening = 0.99;
+                this.current = new Array(this.cols * this.rows).fill(0);
+                this.previous = new Array(this.cols * this.rows).fill(0);
+            }
+
+            index(x, y) {
+                return x + y * this.cols;
+            }
+
+            addDrop(x, y, radius, strength) {
+                for (let i = -radius; i < radius; i++) {
+                    for (let j = -radius; j < radius; j++) {
+                        if (Math.sqrt(i * i + j * j) < radius) {
+                            let xpos = x + i;
+                            let ypos = y + j;
+                            if (xpos >= 0 && xpos < this.cols && ypos >= 0 && ypos < this.rows) {
+                                this.previous[this.index(xpos, ypos)] = strength;
+                            }
+                        }
+                    }
+                }
+            }
+
+            update() {
+                for (let i = 1; i < this.cols - 1; i++) {
+                    for (let j = 1; j < this.rows - 1; j++) {
+                        const idx = this.index(i, j);
+                        this.current[idx] = (
+                            this.previous[this.index(i - 1, j)] +
+                            this.previous[this.index(i + 1, j)] +
+                            this.previous[this.index(i, j - 1)] +
+                            this.previous[this.index(i, j + 1)]
+                        ) / 2 - this.current[idx];
+                        this.current[idx] *= this.dampening;
+                    }
+                }
+
+                // 交换缓冲区
+                [this.current, this.previous] = [this.previous, this.current];
+            }
+
+            draw() {
+                const w = canvas.width / this.cols;
+                const h = canvas.height / this.rows;
+                const color = colors[colorScheme];
+
+                for (let i = 0; i < this.cols; i++) {
+                    for (let j = 0; j < this.rows; j++) {
+                        const x = i * w;
+                        const y = j * h;
+                        const value = this.current[this.index(i, j)];
+                        
+                        ctx.fillStyle = `rgba(${color.r},${color.g},${color.b},${Math.abs(value)})`;
+                        ctx.fillRect(x, y, w, h);
+                    }
+                }
+            }
+        }
+
+        const ripple = new WaterRipple();
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ripple.update();
+            ripple.draw();
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeColor() {
+            colorScheme = (colorScheme + 1) % colors.length;
+        }
+
+        function addRipple() {
+            const x = Math.floor(Math.random() * ripple.cols);
+            const y = Math.floor(Math.random() * ripple.rows);
+            ripple.addDrop(x, y, 5, 1);
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const x = Math.floor(e.clientX / canvas.width * ripple.cols);
+            const y = Math.floor(e.clientY / canvas.height * ripple.rows);
+            ripple.addDrop(x, y, 3, 0.5);
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const x = Math.floor(e.clientX / canvas.width * ripple.cols);
+            const y = Math.floor(e.clientY / canvas.height * ripple.rows);
+            ripple.addDrop(x, y, 10, 2);
+        });
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="addSource()">添加波源</button>
+        <button onclick="changeFrequency()">改变频率</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const sources = [];
+        const resolution = 5;
+        const cols = Math.floor(canvas.width / resolution);
+        const rows = Math.floor(canvas.height / resolution);
+        let time = 0;
+
+        class WaveSource {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.frequency = Math.random() * 0.05 + 0.02;
+                this.amplitude = 1;
+                this.phase = 0;
+                this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            }
+
+            getWaveHeight(x, y, t) {
+                const distance = Math.sqrt((x - this.x) * (x - this.x) + (y - this.y) * (y - this.y));
+                return this.amplitude * Math.sin(distance * this.frequency + t + this.phase) / (distance + 1);
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+            }
+        }
+
+        function calculateInterference(x, y, t) {
+            let total = 0;
+            sources.forEach(source => {
+                total += source.getWaveHeight(x, y, t);
+            });
+            return total;
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(26,26,26,1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    const x = i * resolution;
+                    const y = j * resolution;
+                    const height = calculateInterference(x, y, time);
+                    const brightness = Math.floor((height + 1) * 127.5);
+                    ctx.fillStyle = `rgb(${brightness},${brightness},${brightness})`;
+                    ctx.fillRect(x, y, resolution, resolution);
+                }
+            }
+
+            sources.forEach(source => source.draw());
+
+            time += 0.1;
+            requestAnimationFrame(draw);
+        }
+
+        function addSource() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            sources.push(new WaveSource(x, y));
+        }
+
+        function changeFrequency() {
+            sources.forEach(source => {
+                source.frequency = Math.random() * 0.05 + 0.02;
+            });
+        }
+
+        canvas.addEventListener('click', (e) => {
+            sources.push(new WaveSource(e.clientX, e.clientY));
+        });
+
+        // 初始添加两个波源
+        sources.push(new WaveSource(canvas.width * 0.3, canvas.height * 0.5));
+        sources.push(new WaveSource(canvas.width * 0.7, canvas.height * 0.5));
+
+        draw();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

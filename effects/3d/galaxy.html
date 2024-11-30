@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #000;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="toggleRotation()">暂停/继续</button>
+        <button onclick="changeMode()">切换模式</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const stars = [];
+        const starCount = 10000;
+        let angleX = 0;
+        let angleY = 0;
+        let isRotating = true;
+        let mode = 'spiral'; // spiral or sphere
+
+        class Star {
+            constructor() {
+                this.setPosition();
+                this.color = `hsl(${Math.random() * 360}, 70%, 70%)`;
+                this.size = Math.random() * 2 + 1;
+            }
+
+            setPosition() {
+                if (mode === 'spiral') {
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = Math.random() * 300;
+                    const spiralOffset = Math.random() * Math.PI * 4;
+                    this.x = Math.cos(angle + spiralOffset) * radius;
+                    this.y = Math.sin(angle + spiralOffset) * radius;
+                    this.z = (Math.random() - 0.5) * 100;
+                } else {
+                    const phi = Math.random() * Math.PI * 2;
+                    const theta = Math.random() * Math.PI;
+                    const radius = Math.random() * 300;
+                    this.x = radius * Math.sin(theta) * Math.cos(phi);
+                    this.y = radius * Math.sin(theta) * Math.sin(phi);
+                    this.z = radius * Math.cos(theta);
+                }
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.baseZ = this.z;
+            }
+
+            rotate() {
+                const cosX = Math.cos(angleX);
+                const sinX = Math.sin(angleX);
+                const cosY = Math.cos(angleY);
+                const sinY = Math.sin(angleY);
+
+                const y = this.baseY * cosX - this.baseZ * sinX;
+                const z = this.baseY * sinX + this.baseZ * cosX;
+                const x = this.baseX * cosY - z * sinY;
+
+                this.x = x;
+                this.y = y;
+                this.z = this.baseX * sinY + z * cosY;
+            }
+
+            draw() {
+                const scale = 1000 / (1000 + this.z);
+                const x = this.x * scale + canvas.width / 2;
+                const y = this.y * scale + canvas.height / 2;
+                const size = this.size * scale;
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            stars.length = 0;
+            for (let i = 0; i < starCount; i++) {
+                stars.push(new Star());
+            }
+        }
+
+        function animate() {
+            if (!isRotating) return;
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            angleX += 0.002;
+            angleY += 0.003;
+
+            stars.sort((a, b) => b.z - a.z);
+            stars.forEach(star => {
+                star.rotate();
+                star.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function toggleRotation() {
+            isRotating = !isRotating;
+            if (isRotating) animate();
+        }
+
+        function changeMode() {
+            mode = mode === 'spiral' ? 'sphere' : 'spiral';
+            stars.forEach(star => star.setPosition());
+        }
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // 添加鼠标交互
+        let mouseX = 0;
+        let mouseY = 0;
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - canvas.width / 2) * 0.0001;
+            mouseY = (e.clientY - canvas.height / 2) * 0.0001;
+            angleX += mouseY;
+            angleY += mouseX;
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: fade 1s ease-out forwards;
+        }
+
+        @keyframes fade {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transition: transform 0.1s;
+        }
+
+        .cursor-dot {
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <script>
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+            cursorDot.style.left = e.clientX - 2 + 'px';
+            cursorDot.style.top = e.clientY - 2 + 'px';
+
+            createParticle(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('click', (e) => {
+            cursor.style.transform = 'scale(0.5)';
+            setTimeout(() => {
+                cursor.style.transform = 'scale(1)';
+            }, 100);
+            
+            for (let i = 0; i < 10; i++) {
+                createParticle(e.clientX, e.clientY, true);
+            }
+        });
+
+        function createParticle(x, y, isClick = false) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const size = Math.random() * (isClick ? 20 : 8) + 2;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.background = color;
+            particle.style.boxShadow = `0 0 ${size}px ${color}`;
+            
+            const destinationX = x + (Math.random() - 0.5) * (isClick ? 200 : 50);
+            const destinationY = y + (Math.random() - 0.5) * (isClick ? 200 : 50);
+            
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            document.body.appendChild(particle);
+            
+            requestAnimationFrame(() => {
+                particle.style.transform = `translate(${destinationX - x}px, ${destinationY - y}px)`;
+            });
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 1000);
+        }
+    </script>
+</body>
+</html> 

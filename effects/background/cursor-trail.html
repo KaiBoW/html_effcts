@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: trail 1s linear forwards;
+        }
+
+        @keyframes trail {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.1);
+            }
+        }
+
+        .content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    <div class="content">移动鼠标查看效果</div>
+
+    <script>
+        const cursor = document.querySelector('.cursor');
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+        let lastX = 0;
+        let lastY = 0;
+        let isClicked = false;
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+
+            const distance = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+            
+            if (distance > 10) {
+                createTrail(e.clientX, e.clientY);
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        document.addEventListener('mousedown', () => {
+            cursor.style.width = '15px';
+            cursor.style.height = '15px';
+            isClicked = true;
+        });
+
+        document.addEventListener('mouseup', () => {
+            cursor.style.width = '20px';
+            cursor.style.height = '20px';
+            isClicked = false;
+        });
+
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = x - 5 + 'px';
+            trail.style.top = y - 5 + 'px';
+            trail.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            document.body.appendChild(trail);
+            
+            setTimeout(() => trail.remove(), 1000);
+        }
+    </script>
+</body>
+</html> 

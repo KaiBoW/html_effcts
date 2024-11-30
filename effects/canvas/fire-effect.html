@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeColor()">切换颜色</button>
+        <button onclick="toggleWind()">切换风向</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 200;
+        let colorScheme = 0;
+        let windDirection = 0;
+        const colors = [
+            ['#ff4500', '#ff6b00', '#ff8c00'],
+            ['#4169e1', '#1e90ff', '#00bfff'],
+            ['#32cd32', '#98fb98', '#90ee90']
+        ];
+
+        class FireParticle {
+            constructor(x, y) {
+                this.reset(x, y);
+            }
+
+            reset(x, y) {
+                this.x = x || canvas.width / 2 + (Math.random() - 0.5) * 30;
+                this.y = y || canvas.height - 20;
+                this.size = Math.random() * 3 + 2;
+                this.speedY = -Math.random() * 2 - 1;
+                this.speedX = (Math.random() - 0.5) * 1.5;
+                this.life = 1;
+                this.color = Math.floor(Math.random() * 3);
+            }
+
+            update() {
+                this.x += this.speedX + windDirection;
+                this.y += this.speedY;
+                this.speedY *= 0.99;
+                this.size *= 0.98;
+                this.life -= 0.01;
+
+                if (this.life <= 0 || this.size < 0.5) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = colors[colorScheme][this.color] + Math.floor(this.life * 255).toString(16).padStart(2, '0');
+                ctx.fill();
+
+                // 添加发光效果
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = colors[colorScheme][this.color];
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new FireParticle());
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.shadowBlur = 0;
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeColor() {
+            colorScheme = (colorScheme + 1) % colors.length;
+        }
+
+        function toggleWind() {
+            windDirection = windDirection === 0 ? 1 : (windDirection === 1 ? -1 : 0);
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            // 在鼠标位置添加新的火焰粒子
+            if (Math.random() < 0.3) {
+                particles.push(new FireParticle(mouseX, mouseY));
+            }
+        });
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

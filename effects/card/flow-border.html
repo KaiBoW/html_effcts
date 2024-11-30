@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .flow-card {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+            overflow: hidden;
+        }
+
+        .flow-card::before,
+        .flow-card::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            background: linear-gradient(
+                45deg,
+                #ff0000, #ff7300,
+                #fffb00, #48ff00,
+                #00ffd5, #002bff,
+                #7a00ff, #ff00c8,
+                #ff0000
+            );
+            background-size: 400%;
+            z-index: -1;
+            animation: flow 20s linear infinite;
+        }
+
+        .flow-card::after {
+            filter: blur(20px);
+        }
+
+        @keyframes flow {
+            0% {
+                background-position: 0 0;
+            }
+            50% {
+                background-position: 300% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        .content {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 50px;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="flow-card">
+        <div class="content">流光边框</div>
+    </div>
+</body>
+</html> 

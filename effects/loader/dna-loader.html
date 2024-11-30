@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .dna-container {
+            width: 100px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 4s linear infinite;
+        }
+
+        .helix {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            left: 45px;
+            background: #fff;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .helix-1 .dot { color: #ff3366; }
+        .helix-2 .dot { color: #00ffff; }
+
+        .line {
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background: currentColor;
+            left: 49px;
+            transform-origin: 50% 0;
+        }
+
+        @keyframes rotate {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dna-container">
+        <div class="helix helix-1"></div>
+        <div class="helix helix-2"></div>
+    </div>
+
+    <script>
+        const helix1 = document.querySelector('.helix-1');
+        const helix2 = document.querySelector('.helix-2');
+        const dotCount = 10;
+        const spacing = 200 / (dotCount - 1);
+
+        for (let i = 0; i < dotCount; i++) {
+            const dot1 = document.createElement('div');
+            const dot2 = document.createElement('div');
+            const line1 = document.createElement('div');
+            const line2 = document.createElement('div');
+            
+            dot1.className = 'dot';
+            dot2.className = 'dot';
+            line1.className = 'line';
+            line2.className = 'line';
+
+            const y = i * spacing;
+            const angle = (i / dotCount) * Math.PI * 4;
+            const x1 = Math.sin(angle) * 20;
+            const x2 = Math.sin(angle + Math.PI) * 20;
+
+            dot1.style.transform = `translateX(${x1}px) translateY(${y}px)`;
+            dot2.style.transform = `translateX(${x2}px) translateY(${y}px)`;
+
+            if (i < dotCount - 1) {
+                line1.style.transform = `translateY(${y}px) rotate(${Math.sin(angle) * 30}deg)`;
+                line2.style.transform = `translateY(${y}px) rotate(${Math.sin(angle + Math.PI) * 30}deg)`;
+                helix1.appendChild(line1);
+                helix2.appendChild(line2);
+            }
+
+            helix1.appendChild(dot1);
+            helix2.appendChild(dot2);
+        }
+    </script>
+</body>
+</html> 

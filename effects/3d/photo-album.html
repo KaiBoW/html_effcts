@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+
+        .album {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateY(-30deg);
+            transition: transform 1s;
+        }
+
+        .photo {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            transition: transform 1s;
+            cursor: pointer;
+            backface-visibility: hidden;
+        }
+
+        .photo::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+            border-radius: 10px;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="album"></div>
+    <div class="controls">
+        <button onclick="prevPhoto()">上一张</button>
+        <button onclick="nextPhoto()">下一张</button>
+    </div>
+
+    <script>
+        const album = document.querySelector('.album');
+        const photos = [
+            'https://picsum.photos/600/800?random=1',
+            'https://picsum.photos/600/800?random=2',
+            'https://picsum.photos/600/800?random=3',
+            'https://picsum.photos/600/800?random=4',
+            'https://picsum.photos/600/800?random=5'
+        ];
+        let currentIndex = 0;
+
+        function createPhotos() {
+            photos.forEach((url, i) => {
+                const photo = document.createElement('div');
+                photo.className = 'photo';
+                photo.style.backgroundImage = `url(${url})`;
+                photo.style.transform = `rotateY(${i * 60}deg) translateZ(400px)`;
+                album.appendChild(photo);
+            });
+        }
+
+        function rotateAlbum() {
+            album.style.transform = `rotateY(${currentIndex * -60}deg)`;
+        }
+
+        function nextPhoto() {
+            currentIndex = (currentIndex + 1) % photos.length;
+            rotateAlbum();
+        }
+
+        function prevPhoto() {
+            currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+            rotateAlbum();
+        }
+
+        createPhotos();
+    </script>
+</body>
+</html> 

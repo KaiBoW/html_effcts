@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .svg-container {
+            width: 300px;
+            height: 300px;
+        }
+
+        path {
+            fill: none;
+            stroke: #4ecdc4;
+            stroke-width: 2;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="svg-container">
+        <svg viewBox="0 0 100 100">
+            <path id="path" d="M10,50 Q50,10 90,50 T90,50" />
+        </svg>
+    </div>
+    <div class="controls">
+        <button onclick="changePath('wave')">波浪</button>
+        <button onclick="changePath('heart')">心形</button>
+        <button onclick="changePath('star')">星形</button>
+    </div>
+
+    <script>
+        const path = document.getElementById('path');
+        const paths = {
+            wave: "M10,50 Q50,10 90,50 T90,50",
+            heart: "M50,30 Q60,20 70,30 T90,30 L50,90 L10,30 Q30,20 40,30 T50,30",
+            star: "M50,10 L61,40 L94,40 L68,60 L79,90 L50,70 L21,90 L32,60 L6,40 L39,40 Z"
+        };
+
+        function changePath(type) {
+            path.setAttribute('d', paths[type]);
+            path.style.animation = 'none';
+            path.offsetHeight; // 触发重绘
+            path.style.animation = 'draw 3s ease-in-out infinite alternate';
+        }
+    </script>
+</body>
+</html> 

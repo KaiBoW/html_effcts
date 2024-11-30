@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="changeText('粒子')">文字一</button>
+        <button onclick="changeText('特效')">文字二</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        let targetParticles = [];
+        const particleCount = 1000;
+        const particleRadius = 2;
+        const targetText = '粒子';
+
+        class Particle {
+            constructor(x, y) {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.targetX = x;
+                this.targetY = y;
+                this.dx = (this.targetX - this.x) / 50;
+                this.dy = (this.targetY - this.y) / 50;
+                this.color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+            }
+
+            update() {
+                if (Math.abs(this.targetX - this.x) > 0.1) {
+                    this.x += this.dx;
+                }
+                if (Math.abs(this.targetY - this.y) > 0.1) {
+                    this.y += this.dy;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, particleRadius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function createTextParticles(text) {
+            ctx.font = '150px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const metrics = ctx.measureText(text);
+            const textWidth = metrics.width;
+            const textHeight = 150;
+
+            ctx.fillText(text, canvas.width/2, canvas.height/2);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            const positions = [];
+
+            for (let y = 0; y < canvas.height; y += 5) {
+                for (let x = 0; x < canvas.width; x += 5) {
+                    const i = (y * canvas.width + x) * 4;
+                    if (pixels[i + 3] > 128) {
+                        positions.push({x, y});
+                    }
+                }
+            }
+
+            return positions;
+        }
+
+        function init(text) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const positions = createTextParticles(text);
+            particles = [];
+
+            for (let i = 0; i < Math.min(particleCount, positions.length); i++) {
+                particles.push(new Particle(positions[i].x, positions[i].y));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function changeText(text) {
+            init(text);
+        }
+
+        init(targetText);
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init(targetText);
+        });
+    </script>
+</body>
+</html> 

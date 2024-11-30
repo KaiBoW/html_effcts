@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="addBall()">添加小球</button>
+        <button onclick="toggleGravity()">切换重力</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const balls = [];
+        let hasGravity = false;
+        const gravity = 0.5;
+        const friction = 0.99;
+        const elasticity = 0.8;
+
+        class Ball {
+            constructor(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.radius = Math.random() * 20 + 10;
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10;
+                this.mass = this.radius;
+                this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            }
+
+            update() {
+                if (hasGravity) {
+                    this.vy += gravity;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 边界碰撞
+                if (this.x + this.radius > canvas.width) {
+                    this.x = canvas.width - this.radius;
+                    this.vx *= -elasticity;
+                }
+                if (this.x - this.radius < 0) {
+                    this.x = this.radius;
+                    this.vx *= -elasticity;
+                }
+                if (this.y + this.radius > canvas.height) {
+                    this.y = canvas.height - this.radius;
+                    this.vy *= -elasticity;
+                }
+                if (this.y - this.radius < 0) {
+                    this.y = this.radius;
+                    this.vy *= -elasticity;
+                }
+
+                this.vx *= friction;
+                this.vy *= friction;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.stroke();
+            }
+        }
+
+        function checkCollision(b1, b2) {
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < b1.radius + b2.radius) {
+                const angle = Math.atan2(dy, dx);
+                const sin = Math.sin(angle);
+                const cos = Math.cos(angle);
+
+                // 旋转速度
+                const vx1 = b1.vx * cos + b1.vy * sin;
+                const vy1 = b1.vy * cos - b1.vx * sin;
+                const vx2 = b2.vx * cos + b2.vy * sin;
+                const vy2 = b2.vy * cos - b2.vx * sin;
+
+                // 弹性碰撞
+                const v1 = ((b1.mass - b2.mass) * vx1 + 2 * b2.mass * vx2) / (b1.mass + b2.mass);
+                const v2 = ((b2.mass - b1.mass) * vx2 + 2 * b1.mass * vx1) / (b1.mass + b2.mass);
+
+                b1.vx = v1 * cos - vy1 * sin;
+                b1.vy = vy1 * cos + v1 * sin;
+                b2.vx = v2 * cos - vy2 * sin;
+                b2.vy = vy2 * cos + v2 * sin;
+
+                // 防止重叠
+                const overlap = (b1.radius + b2.radius - distance) / 2;
+                b1.x -= overlap * cos;
+                b1.y -= overlap * sin;
+                b2.x += overlap * cos;
+                b2.y += overlap * sin;
+            }
+        }
+
+        function addBall() {
+            balls.push(new Ball());
+        }
+
+        function toggleGravity() {
+            hasGravity = !hasGravity;
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < balls.length; i++) {
+                balls[i].update();
+                for (let j = i + 1; j < balls.length; j++) {
+                    checkCollision(balls[i], balls[j]);
+                }
+                balls[i].draw();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // 初始添加一些小球
+        for (let i = 0; i < 10; i++) {
+            addBall();
+        }
+
+        animate();
+
+        canvas.addEventListener('click', (e) => {
+            balls.push(new Ball(e.clientX, e.clientY));
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

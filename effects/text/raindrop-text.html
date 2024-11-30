@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .raindrop-container {
+            position: relative;
+            font-size: 5em;
+            font-weight: bold;
+            color: transparent;
+        }
+
+        .raindrop {
+            position: absolute;
+            animation: fall 1s linear forwards;
+            color: #4fc3dc;
+            text-shadow: 0 0 10px #4fc3dc;
+            opacity: 0;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+        }
+
+        .text {
+            position: relative;
+            color: #4fc3dc;
+            text-shadow: 0 0 10px #4fc3dc;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="raindrop-container">
+        <div class="text">雨滴文字</div>
+    </div>
+    <div class="controls">
+        <button onclick="startRain()">开始下雨</button>
+        <button onclick="stopRain()">停止下雨</button>
+    </div>
+
+    <script>
+        const container = document.querySelector('.raindrop-container');
+        const text = document.querySelector('.text');
+        let isRaining = false;
+        let rainInterval;
+
+        function createRaindrop() {
+            const raindrop = document.createElement('div');
+            raindrop.className = 'raindrop';
+            raindrop.textContent = '|';
+            raindrop.style.left = Math.random() * text.offsetWidth + 'px';
+            container.appendChild(raindrop);
+
+            setTimeout(() => {
+                raindrop.remove();
+            }, 1000);
+        }
+
+        function startRain() {
+            if (!isRaining) {
+                isRaining = true;
+                rainInterval = setInterval(createRaindrop, 100);
+            }
+        }
+
+        function stopRain() {
+            isRaining = false;
+            clearInterval(rainInterval);
+        }
+    </script>
+</body>
+</html> 

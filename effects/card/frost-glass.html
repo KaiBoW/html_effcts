@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('https://source.unsplash.com/random/1920x1080');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .frost-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .frost-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 250px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .frost-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .frost-card h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+        }
+
+        .frost-card p {
+            margin: 0;
+            line-height: 1.5;
+            opacity: 0.8;
+        }
+
+        .icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="frost-container">
+        <div class="frost-card">
+            <div class="icon">🌟</div>
+            <h2>特效展示</h2>
+            <p>这是一个霜冻玻璃效果的展示，通过模糊背景实现磨砂玻璃质感。</p>
+        </div>
+        <div class="frost-card">
+            <div class="icon">💡</div>
+            <h2>创意设计</h2>
+            <p>毛玻璃效果可以让界面更加现代化，提升用户体验。</p>
+        </div>
+    </div>
+</body>
+</html> 

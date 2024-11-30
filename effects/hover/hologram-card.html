@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            perspective: 1000px;
+        }
+
+        .hologram-card {
+            width: 300px;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .hologram-effect {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(125deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0) 40%,
+                rgba(255,255,255,0.3) 47%,
+                rgba(255,255,255,0) 54%
+            );
+            background-size: 200% 200%;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hologram-lines {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                transparent 0%,
+                rgba(255,255,255,0.1) 1px,
+                transparent 2px,
+                transparent 4px
+            );
+            border-radius: 20px;
+            opacity: 0.3;
+        }
+
+        .hologram-glow {
+            position: absolute;
+            inset: -2px;
+            border-radius: 22px;
+            background: radial-gradient(circle at var(--x) var(--y),
+                rgba(78,205,196,0.8),
+                rgba(78,205,196,0.1) 40%,
+                transparent 60%
+            );
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #4ecdc4;
+            text-shadow: 0 0 10px rgba(78,205,196,0.5);
+            z-index: 1;
+        }
+
+        .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 1.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hologram-card:hover .hologram-effect {
+            opacity: 1;
+            animation: shine 3s linear infinite;
+        }
+
+        .hologram-card:hover .hologram-glow {
+            opacity: 1;
+        }
+
+        @keyframes shine {
+            0% { background-position: -200% -200%; }
+            100% { background-position: 200% 200%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hologram-card">
+        <div class="card-content">
+            <div class="content">
+                <div class="icon">⚡</div>
+                <div class="title">全息效果</div>
+            </div>
+            <div class="hologram-lines"></div>
+            <div class="hologram-effect"></div>
+            <div class="hologram-glow"></div>
+        </div>
+    </div>
+
+    <script>
+        const card = document.querySelector('.hologram-card');
+        const glow = document.querySelector('.hologram-glow');
+
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = (y - centerY) / 10;
+            const rotateY = -(x - centerX) / 10;
+
+            card.querySelector('.card-content').style.transform = 
+                `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+            glow.style.setProperty('--x', x + 'px');
+            glow.style.setProperty('--y', y + 'px');
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.querySelector('.card-content').style.transform = 
+                'rotateX(0) rotateY(0)';
+        });
+    </script>
+</body>
+</html> 

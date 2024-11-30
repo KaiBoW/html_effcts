@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="addSphere()">添加球体</button>
+        <button onclick="toggleAnimation()">暂停/继续</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let isAnimating = true;
+        const spheres = [
+            { x: 0, y: 0, z: -100, radius: 50, color: '#ff0000' },
+            { x: 100, y: 0, z: -200, radius: 30, color: '#00ff00' },
+            { x: -100, y: 50, z: -150, radius: 40, color: '#0000ff' }
+        ];
+        const light = { x: 200, y: -200, z: 100 };
+        let angleY = 0;
+
+        function normalize(vector) {
+            const length = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+            return {
+                x: vector.x / length,
+                y: vector.y / length,
+                z: vector.z / length
+            };
+        }
+
+        function dot(v1, v2) {
+            return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+        }
+
+        function intersectSphere(origin, direction, sphere) {
+            const oc = {
+                x: origin.x - sphere.x,
+                y: origin.y - sphere.y,
+                z: origin.z - sphere.z
+            };
+            const a = dot(direction, direction);
+            const b = 2 * dot(oc, direction);
+            const c = dot(oc, oc) - sphere.radius * sphere.radius;
+            const discriminant = b * b - 4 * a * c;
+
+            if (discriminant < 0) return null;
+
+            const t = (-b - Math.sqrt(discriminant)) / (2 * a);
+            if (t < 0) return null;
+
+            const point = {
+                x: origin.x + direction.x * t,
+                y: origin.y + direction.y * t,
+                z: origin.z + direction.z * t
+            };
+
+            const normal = normalize({
+                x: point.x - sphere.x,
+                y: point.y - sphere.y,
+                z: point.z - sphere.z
+            });
+
+            return { point, normal, sphere };
+        }
+
+        function castRay(origin, direction) {
+            let closest = null;
+            let minDistance = Infinity;
+
+            spheres.forEach(sphere => {
+                const intersection = intersectSphere(origin, direction, sphere);
+                if (intersection) {
+                    const distance = Math.sqrt(
+                        Math.pow(intersection.point.x - origin.x, 2) +
+                        Math.pow(intersection.point.y - origin.y, 2) +
+                        Math.pow(intersection.point.z - origin.z, 2)
+                    );
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closest = intersection;
+                    }
+                }
+            });
+
+            return closest;
+        }
+
+        function render() {
+            const imageData = ctx.createImageData(canvas.width, canvas.height);
+            const data = imageData.data;
+
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const direction = normalize({
+                        x: (x - canvas.width/2),
+                        y: (y - canvas.height/2),
+                        z: -canvas.width
+                    });
+
+                    const origin = { x: 0, y: 0, z: 200 };
+                    const intersection = castRay(origin, direction);
+
+                    const i = (y * canvas.width + x) * 4;
+                    if (intersection) {
+                        const lightDir = normalize({
+                            x: light.x - intersection.point.x,
+                            y: light.y - intersection.point.y,
+                            z: light.z - intersection.point.z
+                        });
+
+                        const diffuse = Math.max(0, dot(intersection.normal, lightDir));
+                        const color = hexToRgb(intersection.sphere.color);
+
+                        data[i] = color.r * diffuse;
+                        data[i + 1] = color.g * diffuse;
+                        data[i + 2] = color.b * diffuse;
+                        data[i + 3] = 255;
+                    } else {
+                        data[i] = 0;
+                        data[i + 1] = 0;
+                        data[i + 2] = 0;
+                        data[i + 3] = 255;
+                    }
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function animate() {
+            if (!isAnimating) return;
+            angleY += 0.02;
+            spheres.forEach(sphere => {
+                const x = sphere.x;
+                const z = sphere.z;
+                sphere.x = x * Math.cos(angleY) - z * Math.sin(angleY);
+                sphere.z = x * Math.sin(angleY) + z * Math.cos(angleY);
+            });
+            render();
+            requestAnimationFrame(animate);
+        }
+
+        function addSphere() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff'];
+            spheres.push({
+                x: (Math.random() - 0.5) * 200,
+                y: (Math.random() - 0.5) * 200,
+                z: -100 - Math.random() * 100,
+                radius: 20 + Math.random() * 30,
+                color: colors[Math.floor(Math.random() * colors.length)]
+            });
+        }
+
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            if (isAnimating) animate();
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            render();
+        });
+    </script>
+</body>
+</html> 

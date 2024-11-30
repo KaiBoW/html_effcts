@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button onclick="toggleGravity()">切换重力</button>
+        <button onclick="changeColor()">切换颜色</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 1000;
+        const maxDistance = 100;
+        let hasGravity = true;
+        let colorScheme = 0;
+        const colors = [
+            ['#4ecdc4', '#45b7af', '#3ca29a'],
+            ['#ff6b6b', '#ff5252', '#ff3939'],
+            ['#ffe66d', '#ffd700', '#ffc300']
+        ];
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = Math.random() * 2 + 2;
+                this.colorIndex = Math.floor(Math.random() * 3);
+                this.neighbors = [];
+            }
+
+            update() {
+                if (hasGravity) {
+                    this.vy += 0.1;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 边界检查
+                if (this.x < 0) {
+                    this.x = 0;
+                    this.vx *= -0.5;
+                }
+                if (this.x > canvas.width) {
+                    this.x = canvas.width;
+                    this.vx *= -0.5;
+                }
+                if (this.y < 0) {
+                    this.y = 0;
+                    this.vy *= -0.5;
+                }
+                if (this.y > canvas.height) {
+                    this.y = canvas.height;
+                    this.vy *= -0.5;
+                }
+
+                // 粘性
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+            }
+
+            findNeighbors() {
+                this.neighbors = [];
+                particles.forEach(particle => {
+                    if (particle !== this) {
+                        const dx = particle.x - this.x;
+                        const dy = particle.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < maxDistance) {
+                            this.neighbors.push({
+                                particle,
+                                distance
+                            });
+                        }
+                    }
+                });
+            }
+
+            interact() {
+                this.neighbors.forEach(({particle, distance}) => {
+                    const force = (maxDistance - distance) / maxDistance;
+                    const dx = particle.x - this.x;
+                    const dy = particle.y - this.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    this.vx += Math.cos(angle) * force * 0.01;
+                    this.vy += Math.sin(angle) * force * 0.01;
+                });
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = colors[colorScheme][this.colorIndex];
+                ctx.fill();
+
+                // 绘制连接线
+                this.neighbors.forEach(({particle, distance}) => {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(particle.x, particle.y);
+                    ctx.strokeStyle = `rgba(255,255,255,${(maxDistance - distance) / maxDistance * 0.2})`;
+                    ctx.stroke();
+                });
+            }
+        }
+
+        function init() {
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(26,26,26,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.findNeighbors();
+                particle.interact();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        function toggleGravity() {
+            hasGravity = !hasGravity;
+        }
+
+        function changeColor() {
+            colorScheme = (colorScheme + 1) % colors.length;
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            particles.forEach(particle => {
+                const dx = mouseX - particle.x;
+                const dy = mouseY - particle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 100) {
+                    const force = (100 - distance) / 100;
+                    particle.vx += dx * force * 0.02;
+                    particle.vy += dy * force * 0.02;
+                }
+            });
+        });
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .glow-card {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0c0c0c;
+            margin: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .glow-card::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: conic-gradient(
+                #ff0000,
+                #ff7300,
+                #fffb00,
+                #48ff00,
+                #00ffd5,
+                #002bff,
+                #7a00ff,
+                #ff00c8,
+                #ff0000
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        .glow-card::after {
+            content: '';
+            position: absolute;
+            background: #0c0c0c;
+            inset: 3px;
+            border-radius: 17px;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #aaa;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-card">
+        <div class="content">
+            <h2>炫彩边框</h2>
+            <p>这是一个动态发光的边框效果，通过渐变色和动画实现炫丽的视觉效果。</p>
+        </div>
+    </div>
+</body>
+</html> 

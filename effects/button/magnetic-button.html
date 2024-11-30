@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .magnetic-button {
+            position: relative;
+            padding: 20px 40px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .magnetic-button::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: #1976D2;
+            border-radius: 12px;
+            z-index: -1;
+            transform: translateZ(-1px);
+        }
+    </style>
+</head>
+<body>
+    <button class="magnetic-button">磁性按钮</button>
+    <script>
+        const button = document.querySelector('.magnetic-button');
+        const boundingRect = button.getBoundingClientRect();
+        const centerX = boundingRect.left + boundingRect.width / 2;
+        const centerY = boundingRect.top + boundingRect.height / 2;
+
+        document.addEventListener('mousemove', (e) => {
+            const deltaX = e.clientX - centerX;
+            const deltaY = e.clientY - centerY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance < 100) {
+                const angle = Math.atan2(deltaY, deltaX);
+                const force = (100 - distance) / 100; // 0 到 1 之间的值
+                
+                const moveX = Math.cos(angle) * force * 10;
+                const moveY = Math.sin(angle) * force * 10;
+                
+                button.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            } else {
+                button.style.transform = 'translate(0, 0)';
+            }
+        });
+
+        button.addEventListener('mouseleave', () => {
+            button.style.transform = 'translate(0, 0)';
+        });
+    </script>
+</body>
+</html> 

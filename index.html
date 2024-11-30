@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>炫酷特效导航</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .effect-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+        }
+
+        .effect-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .effect-card a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2em;
+            display: block;
+            padding: 10px;
+        }
+
+        .effect-card p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+
+        .categories {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .category-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .effect-card.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .search-input {
+            padding: 10px 20px;
+            width: 300px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>炫酷特效集合</h1>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="搜索特效...">
+        </div>
+
+        <div class="categories">
+            <button class="category-btn active" data-category="all">全部</button>
+            <button class="category-btn" data-category="text">文字效果</button>
+            <button class="category-btn" data-category="button">按钮特效</button>
+            <button class="category-btn" data-category="card">卡片动画</button>
+            <button class="category-btn" data-category="background">背景效果</button>
+            <button class="category-btn" data-category="loader">加载动画</button>
+            <button class="category-btn" data-category="hover">悬停效果</button>
+            <button class="category-btn" data-category="3d">3D特效</button>
+            <button class="category-btn" data-category="particle">粒子效果</button>
+            <button class="category-btn" data-category="svg">SVG动画</button>
+            <button class="category-btn" data-category="canvas">Canvas特效</button>
+        </div>
+
+        <div class="effects-grid">
+            <!-- 文字效果 -->
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/neon-text.html">霓虹灯文字</a>
+                <p>闪烁的霓虹灯效果文字</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/typewriter.html">打字机效果</a>
+                <p>自动打字机文字动画</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/gradient-text.html">渐变文字</a>
+                <p>动态渐变文字动画</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/glitch-text.html">故障文字</a>
+                <p>赛博朋克风格的故障文字效果</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/stroke-text.html">描边文字</a>
+                <p>动态描边填充文字效果</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/shine-text.html">扫光文字</a>
+                <p>文字扫光动画效果</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/3d-text.html">3D文字</a>
+                <p>立体感十足的3D文字效果</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/shatter-text.html">碎片文字</a>
+                <p>点击文字产生碎片化效果</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/wave-text.html">波浪文字</a>
+                <p>文字波���动画效果</p>
+            </div>
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/raindrop-text.html">雨滴文字</a>
+                <p>文字雨滴动画效果</p>
+            </div>
+
+            <!-- 按钮特效 -->
+            <div class="effect-card" data-category="button">
+                <a href="effects/button/water-wave.html">水波纹按钮</a>
+                <p>点击产生水波效果</p>
+            </div>
+            <div class="effect-card" data-category="button">
+                <a href="effects/button/magnetic-button.html">磁性按钮</a>
+                <p>跟随鼠标的磁性按钮效果</p>
+            </div>
+            <div class="effect-card" data-category="button">
+                <a href="effects/button/particle-button.html">粒子按钮</a>
+                <p>点击产生粒子爆炸效果</p>
+            </div>
+            <div class="effect-card" data-category="button">
+                <a href="effects/button/glow-button.html">发光按钮</a>
+                <p>悬浮发光边框按钮效果</p>
+            </div>
+
+            <!-- 卡片动画 -->
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/hover-card.html">悬浮卡片</a>
+                <p>优雅的卡片悬浮效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/3d-flip.html">3D翻转卡片</a>
+                <p>炫酷的3D翻转效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/parallax-card.html">3D视差卡片</a>
+                <p>随鼠标的3D视差效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/frost-glass.html">霜冻玻璃</a>
+                <p>毛玻璃磨砂效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/glow-border.html">发光边框</a>
+                <p>炫彩动态发光边框效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/fold-card.html">折叠卡片</a>
+                <p>3D折叠展开动画效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/cube-3d.html">3D立方体</a>
+                <p>可旋转的3D立方体效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/page-flip.html">3D翻页</a>
+                <p>真实的3D翻页动画效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/hover-expand.html">图片展开</a>
+                <p>悬浮展开图片画廊效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/card-wall.html">3D卡片墙</a>
+                <p>3D旋转卡片墙特效</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/gallery-3d.html">3D画廊</a>
+                <p>3D旋转图片画廊</p>
+            </div>
+
+            <!-- 背景效果 -->
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/particle-background.html">粒子背景</a>
+                <p>动态粒子连接效果</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/bubble-background.html">动态气泡</a>
+                <p>互动式动态气泡背景</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/matrix-rain.html">数字雨</a>
+                <p>黑客国风格数字雨效果</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/flowing-gradient.html">流动渐变</a>
+                <p>动态流动的渐变背景</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/grid-background.html">动态网格</a>
+                <p>交互动态网格背景</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/mouse-particles.html">鼠标粒子</a>
+                <p>鼠标跟随粒子特效</p>
+            </div>
+
+            <!-- 加载动画 -->
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/creative-loader.html">创意加载</a>
+                <p>炫酷的加载动画效果</p>
+            </div>
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/infinity-loader.html">无限加载</a>
+                <p>双圆环无限旋转加载动画</p>
+            </div>
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/svg-loader.html">SVG加载</a>
+                <p>SVG动画加载效果</p>
+            </div>
+
+            <!-- 文字效果 -->
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/scan-text.html">扫描文字</a>
+                <p>文字扫描动画效果</p>
+            </div>
+
+            <!-- 背景效果 -->
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/fluid-animation.html">流体动画</a>
+                <p>流动的背景动画效果</p>
+            </div>
+
+            <!-- 背景效果 -->
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/meteor-shower.html">流星雨</a>
+                <p>动态流星雨背景效果</p>
+            </div>
+
+            <!-- 文字效果 -->
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/shadow-3d.html">3D阴影</a>
+                <p>3D文字阴影动画效果</p>
+            </div>
+
+            <!-- 按钮特效 -->
+            <div class="effect-card" data-category="button">
+                <a href="effects/button/slice-button.html">切片按钮</a>
+                <p>创意切片动画按效果</p>
+            </div>
+
+            <!-- 文字效果 -->
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/explode-text.html">爆炸文字</a>
+                <p>点击文字粒子爆炸效果</p>
+            </div>
+
+            <!-- 背景效果 -->
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/wave-background.html">波浪背景</a>
+                <p>动态波浪背景动画效果</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/cursor-trail.html">光标轨</a>
+                <p>鼠标移动轨迹效</p>
+            </div>
+
+            <!-- 卡片动画 -->
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/stack-cards.html">堆叠卡片</a>
+                <p>3D卡片堆叠动画效果</p>
+            </div>
+            <div class="effect-card" data-category="card">
+                <a href="effects/card/flow-border.html">流光边框</a>
+                <p>炫彩流光边框动画效果</p>
+            </div>
+
+            <!-- 文字效果 -->
+            <div class="effect-card" data-category="text">
+                <a href="effects/text/morph-text.html">变形文字</a>
+                <p>粒子文字变形画效果</p>
+            </div>
+
+            <!-- 背景果 -->
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/parallax-scroll.html">差滚动</a>
+                <p>3D视差滚动背景效果</p>
+            </div>
+            <div class="effect-card" data-category="background">
+                <a href="effects/background/dynamic-grid.html">动态网格</a>
+                <p>动态交互网格背景效果</p>
+            </div>
+
+            <!-- SVG动画 -->
+            <div class="effect-card" data-category="svg">
+                <a href="effects/svg/morphing-svg.html">变形SVG</a>
+                <p>SVG形状变形动画效果</p>
+            </div>
+
+            <!-- 悬停效果 -->
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/magnetic-hover.html">磁性悬停</a>
+                <p>磁性跟随悬停效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/text-wall.html">3D文字墙</a>
+                <p>3D空间文字墙特效</p>
+            </div>
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/photo-album.html">3D相册</a>
+                <p>3D旋转相册画廊效果</p>
+            </div>
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/nav-menu.html">3D导航</a>
+                <p>3D立方体导航菜单</p>
+            </div>
+
+            <!-- 粒子效果 -->
+            <div class="effect-card" data-category="particle">
+                <a href="effects/particle/particle-image.html">粒子交互</a>
+                <p>鼠标交互粒子动画效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/particle-sphere.html">3D粒子球</a>
+                <p>3D粒子球体变形特效</p>
+            </div>
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/image-wall.html">3D图片墙</a>
+                <p>3D视差图片墙特效</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/fold-menu.html">3D折叠菜单</a>
+                <p>3D折叠展开菜单特效</p>
+            </div>
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/morph-text-3d.html">3D文字变形</a>
+                <p>3D空间文字变形特效</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/particle-flow.html">粒子流动</a>
+                <p>3D空间粒子流动特效</p>
+            </div>
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/stack-hover.html">堆叠悬浮</a>
+                <p>3D卡片堆叠悬浮效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/parallax-scroll-3d.html">3D视差滚动</a>
+                <p>3D空间视差滚动效果</p>
+            </div>
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/particle-morph-3d.html">3D粒子变形</a>
+                <p>3D空间粒子文字变形</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/ray-tracing.html">光线追踪</a>
+                <p>3D光线追踪渲染效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/galaxy.html">3D星系</a>
+                <p>3D粒子星系动画效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/fluid-simulation.html">流体模拟</a>
+                <p>3D流体动力学模拟效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/audio-visualizer.html">音频可视化</a>
+                <p>3D音频频谱视化效果</p>
+            </div>
+
+            <!-- 3D特效 -->
+            <div class="effect-card" data-category="3d">
+                <a href="effects/3d/particle-tunnel.html">粒子隧道</a>
+                <p>3D粒子隧道飞行效果</p>
+            </div>
+
+            <!-- 加载动画 -->
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/dna-loader.html">DNA加载</a>
+                <p>DNA双螺旋加载动画效果</p>
+            </div>
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/particle-ring.html">粒子环</a>
+                <p>3D粒子环加载动画效果</p>
+            </div>
+
+            <!-- 加载动画 -->
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/cube-loader.html">方体加载</a>
+                <p>3D立方体旋转加载动画</p>
+            </div>
+            <div class="effect-card" data-category="loader">
+                <a href="effects/loader/wave-loader.html">波浪加载</a>
+                <p>流体波浪加载动画效果</p>
+            </div>
+
+            <!-- 悬停效果 -->
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/3d-hover-card.html">3D卡悬停</a>
+                <p>3D视差卡片悬停效果</p>
+            </div>
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/glow-button-hover.html">发光按钮</a>
+                <p>炫彩发光按钮悬停效果</p>
+            </div>
+
+            <!-- 悬停效果 -->
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/magnetic-image.html">磁性图片</a>
+                <p>磁性图片悬停交互效果</p>
+            </div>
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/particle-text-hover.html">粒子文字</a>
+                <p>文字粒子化悬停效果</p>
+            </div>
+
+            <!-- 悬停效果 -->
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/liquid-button.html">液态按钮</a>
+                <p>液态流动按钮悬停效果</p>
+            </div>
+
+            <!-- 悬停效果 -->
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/hologram-card.html">全息卡片</a>
+                <p>全息投影卡片悬停效果</p>
+            </div>
+
+            <!-- 悬停效果 -->
+            <div class="effect-card" data-category="hover">
+                <a href="effects/hover/neon-border.html">霓虹边框</a>
+                <p>霓虹灯扫描边框悬停效果</p>
+            </div>
+
+            <!-- SVG动画 -->
+            <div class="effect-card" data-category="svg">
+                <a href="effects/svg/path-animation.html">路径动画</a>
+                <p>SVG路径描绘动画效果</p>
+            </div>
+
+            <!-- SVG动画 -->
+            <div class="effect-card" data-category="svg">
+                <a href="effects/svg/icon-animation.html">图标动画</a>
+                <p>SVG图标交互动画效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/fire-effect.html">火焰效果</a>
+                <p>动态火焰粒子动画效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/water-ripple.html">水波纹</a>
+                <p>交互式水波纹动画效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/cloth-simulation.html">布料模拟</a>
+                <p>物理引擎布料模拟效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/elastic-collision.html">弹性碰撞</a>
+                <p>物理引擎弹性碰撞模拟</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/gravity-field.html">重力场</a>
+                <p>重力场粒子模拟效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/magnetic-field.html">磁场可视化</a>
+                <p>磁场力线可视化模拟效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/wave-interference.html">声波干涉</a>
+                <p>波动干涉模拟可视化效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/fractal-tree.html">分形树</a>
+                <p>交互式分形树生成效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/particle-avatar.html">粒子头像</a>
+                <p>交互式粒子头像特效</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/particle-text-morph.html">粒子文字变形</a>
+                <p>粒子文字动态变形特效</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/particle-pattern-morph.html">图案变换</a>
+                <p>粒子图案动态变换特效</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/particle-fluid.html">粒子流体</a>
+                <p>粒子流体物理模拟效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/particle-galaxy.html">粒子星系</a>
+                <p>粒子星系生成模拟效果</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/game-of-life.html">生命游戏</a>
+                <p>康威生命游戏粒子模拟</p>
+            </div>
+
+            <!-- Canvas特效 -->
+            <div class="effect-card" data-category="canvas">
+                <a href="effects/canvas/audio-visualizer.html">音乐可视化</a>
+                <p>粒子音乐可视化动画效果</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 分类筛选功能
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const effectCards = document.querySelectorAll('.effect-card');
+        const searchInput = document.querySelector('.search-input');
+
+        // 显示所有卡片
+        function showAllCards() {
+            effectCards.forEach(card => card.classList.add('show'));
+        }
+
+        // 初始显示所有卡片
+        showAllCards();
+
+        // 分类按钮点击事件
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有按钮的active类
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                // 添加当前按钮的active类
+                btn.classList.add('active');
+
+                const category = btn.dataset.category;
+                
+                effectCards.forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.classList.add('show');
+                    } else {
+                        card.classList.remove('show');
+                    }
+                });
+            });
+        });
+
+        // 搜索功能
+        searchInput.addEventListener('input', (e) => {
+            const searchText = e.target.value.toLowerCase();
+            
+            effectCards.forEach(card => {
+                const title = card.querySelector('a').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchText) || description.includes(searchText)) {
+                    card.classList.add('show');
+                } else {
+                    card.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

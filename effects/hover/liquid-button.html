@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .liquid-button {
+            position: relative;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            color: #4ecdc4;
+            background: none;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .liquid-button::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: #1a1a1a;
+            z-index: 1;
+        }
+
+        .liquid-button span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .liquid-button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, #4ecdc4, #ff6b6b, #4ecdc4);
+            filter: blur(5px);
+            transition: all 0.3s;
+        }
+
+        .liquid-button:hover::after {
+            filter: blur(20px);
+            animation: liquid 2s linear infinite;
+        }
+
+        @keyframes liquid {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .bubbles {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .liquid-button:hover .bubbles {
+            opacity: 1;
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: bubble 2s ease-in-out infinite;
+        }
+
+        @keyframes bubble {
+            0% {
+                transform: translateY(100%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100%) scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="liquid-button">
+        <span>液态按钮</span>
+        <div class="bubbles"></div>
+    </button>
+
+    <script>
+        const button = document.querySelector('.liquid-button');
+        const bubbles = document.querySelector('.bubbles');
+
+        // 创建气泡
+        for (let i = 0; i < 20; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 20 + 10;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.animationDelay = `${Math.random() * 2}s`;
+            bubbles.appendChild(bubble);
+        }
+    </script>
+</body>
+</html> 
